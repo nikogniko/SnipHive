@@ -9,64 +9,80 @@
 
 
 <!-- Модальне вікно Реєстрації -->
-<div id="registerModal" class="modal" ng-controller="processAuthorization">
+<div id="registerModal" class="modal" ng-controller="RegistrationController" ng-show="showRegisterModal">
     <div class="modal-content">
-        <span id="closeModal" class="close" ng-click="closeRegisterModal">&times;</span>
+        <span class="close" ng-click="closeRegisterModal()">&times;</span>
         <h2 class="modal-title">Реєстрація</h2>
-        <form id="registerForm">
-            <div class="form-group">
+        <form name="registerForm" ng-submit="register()" novalidate>
+            <div class="form-group" ng-class="{'has-error': registerForm.registerUsername.$invalid && registerForm.registerUsername.$touched}">
                 <label for="registerUsername">Нікнейм</label>
-                <input type="text" id="registerUsername" name="registerUsername" class="form-input" required />
-                <small class="error-message" id="registerUsernameError"></small>
+                <input type="text" id="registerUsername" name="registerUsername" class="form-input"
+                       ng-model="registerData.username" ng-minlength="3" required />
+                <small class="error-message" ng-show="registerForm.registerUsername.$invalid && registerForm.registerUsername.$touched">
+                    Нікнейм користувача повинен містити мінімум 3 символи
+                </small>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-class="{'has-error': registerForm.registerEmail.$invalid && registerForm.registerEmail.$touched}">
                 <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" name="registerEmail" class="form-input" required />
-                <small class="error-message" id="registerEmailError"></small>
+                <input type="email" id="registerEmail" name="registerEmail" class="form-input" ng-model="registerData.email" required />
+                <small class="error-message" ng-show="registerForm.registerEmail.$invalid && registerForm.registerEmail.$touched">
+                    Введіть коректну адресу електронної пошти
+                </small>
             </div>
-            <div class="form-group password-group">
+            <div class="form-group password-group" ng-class="{'has-error': registerForm.registerPassword.$invalid && registerForm.registerPassword.$touched}">
                 <label for="registerPassword">Пароль</label>
                 <div class="password-wrapper">
-                    <input type="password" id="registerPassword" name="registerPassword" class="form-input" minlength="8" maxlength="25" required />
-                    <span id="togglePassword" class="toggle-password">👁️</span>
+                    <input type="{{showPassword ? 'text' : 'password'}}" id="registerPassword" name="registerPassword" class="form-input"
+                           ng-model="registerData.password" ng-minlength="8" ng-maxlength="25" required />
+                    <span class="toggle-password" ng-click="togglePasswordVisibility()">
+                        {{showPassword ? '👁️‍🗨️' : '👁️'}}
+                    </span>
                 </div>
-                <small class="error-message" id="registerPasswordError"></small>
+                <small class="error-message" ng-show="registerForm.registerPassword.$invalid && registerForm.registerPassword.$touched">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
             </div>
             <div class="register-btns-group">
-                <button type="button" id="btn-to-login" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
-                <button type="button" id="registerButton" class="primary-btn btn-form-register">Зареєструватися</button>
+                <button type="button" class="secondary-btn btn-to-login" ng-click="switchToLogin()">Вже зареєстровані?</button>
+                <button type="submit" class="primary-btn btn-form-register">Зареєструватися</button>
             </div>
         </form>
     </div>
 </div>
 
-
-
 <!-- Модальне вікно для входу -->
-<div id="loginModal" class="modal">
+<div id="loginModal" class="modal" ng-controller="LoginController" ng-show="showLoginModal">
     <div class="modal-content">
-        <span id="closeLoginModal" class="close">&times;</span>
+        <span class="close" ng-click="closeLoginModal()">&times;</span>
         <h2 class="modal-title">Вхід в систему</h2>
-        <form id="loginForm">
-            <div class="form-group">
+        <form name="loginForm" ng-submit="login()" novalidate>
+            <div class="form-group" ng-class="{'has-error': loginForm.loginEmail.$invalid && loginForm.loginEmail.$touched}">
                 <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" name="loginEmail" class="form-input" required />
-                <small class="error-message" id="loginEmailError"></small>
+                <input type="email" id="loginEmail" name="loginEmail" class="form-input" ng-model="loginData.email" required />
+                <small class="error-message" ng-show="loginForm.loginEmail.$invalid && loginForm.loginEmail.$touched">
+                    Введіть коректну адресу електронної пошти
+                </small>
             </div>
-            <div class="form-group password-group">
+            <div class="form-group password-group" ng-class="{'has-error': loginForm.loginPassword.$invalid && loginForm.loginPassword.$touched}">
                 <label for="loginPassword">Пароль</label>
                 <div class="password-wrapper">
-                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required />
-                    <span id="toggleLoginPassword" class="toggle-password">👁️</span>
+                    <input type="{{showPassword ? 'text' : 'password'}}" id="loginPassword" name="loginPassword" class="form-input"
+                           ng-model="loginData.password" ng-minlength="8" ng-maxlength="25" required />
+                    <span class="toggle-password" ng-click="togglePasswordVisibility()">
+                        {{showPassword ? '👁️‍🗨️' : '👁️'}}
+                    </span>
                 </div>
-                <small class="error-message" id="loginPasswordError"></small>
+                <small class="error-message" ng-show="loginForm.loginPassword.$invalid && loginForm.loginPassword.$touched">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
             </div>
             <a href="#" class="forgot-password">Забули пароль?</a>
             <div class="register-btns-group">
-                <button type="button" id="btn-to-register" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
-                <button type="button" id="loginButton" class="primary-btn">Увійти</button>
+                <button type="button" class="secondary-btn btn-to-register" ng-click="switchToRegister()">Ще не зареєстровані?</button>
+                <button type="submit" class="primary-btn">Увійти</button>
             </div>
         </form>
     </div>
 </div>
+
 

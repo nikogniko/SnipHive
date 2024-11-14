@@ -7,7 +7,7 @@
     //var activeUserId = ViewBag.UserId;
     //var activeUserName = ViewBag.UserName;
 }
-
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SnippetsLibraryWebApp.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body ng-app="SnipHiveFrontend" ng-controller="MainController">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -49,14 +49,26 @@
                     </li>
                 </ul>
 
-                <ul class="navbar-nav ml-auto align-items-center" ng-controller="processAuthorization">
-                    <li class="nav-item">
-                        <!-- Кнопка для відкриття модального вікна Входу -->
-                        <button type="button" id="openLoginModal" class="btn secondary-btn">Увійти</button>
+                <ul class="navbar-nav ml-auto align-items-center">
+                    <!-- Show Login and Register buttons when not authenticated -->
+                    <li class="nav-item" ng-if="!isAuthenticated">
+                        <button type="button" class="btn secondary-btn" ng-click="openLoginModal()">Увійти</button>
                     </li>
-                    <li class="nav-item">
-                        <!-- Кнопка для відкриття модального вікна Реєстрації -->
-                        <button type="button" id="openRegisterModal" class="btn primary-btn" ng-click="openRegisterModal">Зареєструватися</button>
+                    <li class="nav-item" ng-if="!isAuthenticated">
+                        <button type="button" class="btn primary-btn" ng-click="openRegisterModal()">Зареєструватися</button>
+                    </li>
+                
+                    <!-- Show Add Snippet button and Username when authenticated -->
+                    <li class="nav-item" ng-if="isAuthenticated">
+                        <a href="/AddSnippet/AddSnippet" class="secondary-btn btn-add-snippet">+ Додати сніпет</a>
+                    </li>
+                    <li class="nav-item dropdown" ng-if="isAuthenticated">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" ng-click="toggleUserMenu()" role="button">
+                            {{activeUserName}}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" ng-show="userMenuVisible">
+                            <a class="dropdown-item" href="#" ng-click="logout()">Вийти</a>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -73,10 +85,9 @@
             &copy; 2024 - SnipHive - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>\
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
