@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "All snippets";
+}
+
+@* <div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div> *@
+
+
+<!-- Модальне вікно Реєстрації -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2 class="modal-title">Реєстрація</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="registerUsername">Нікнейм</label>
+                <input type="text" id="registerUsername" name="registerUsername" class="form-input" required />
+                <small class="error-message" id="registerUsernameError"></small>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" name="registerEmail" class="form-input" required />
+                <small class="error-message" id="registerEmailError"></small>
+            </div>
+            <div class="form-group password-group">
+                <label for="registerPassword">Пароль</label>
+                <div class="password-wrapper">
+                    <input type="password" id="registerPassword" name="registerPassword" class="form-input" minlength="8" maxlength="25" required />
+                    <span id="togglePassword" class="toggle-password">👁️</span>
+                </div>
+                <small class="error-message" id="registerPasswordError"></small>
+            </div>
+            <div class="register-btns-group">
+                <button type="button" id="btn-to-login" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
+                <button type="button" id="registerButton" class="primary-btn btn-form-register">Зареєструватися</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<!-- Модальне вікно для входу -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span id="closeLoginModal" class="close">&times;</span>
+        <h2 class="modal-title">Вхід в систему</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" name="loginEmail" class="form-input" required />
+                <small class="error-message" id="loginEmailError"></small>
+            </div>
+            <div class="form-group password-group">
+                <label for="loginPassword">Пароль</label>
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required />
+                    <span id="toggleLoginPassword" class="toggle-password">👁️</span>
+                </div>
+                <small class="error-message" id="loginPasswordError"></small>
+            </div>
+            <a href="#" class="forgot-password">Забули пароль?</a>
+            <div class="register-btns-group">
+                <button type="button" id="btn-to-register" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
+                <button type="button" id="loginButton" class="primary-btn">Увійти</button>
+            </div>
+        </form>
+    </div>
+</div>
+
