@@ -130,14 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Збереження userId в локальному сховищі або в сесії
 
-                    //localStorage.setItem("activeUserId", response.userId);
+                    localStorage.setItem("activeUserId", response.userId);
 
-                    activeUserId = response.userId;
+                    //activeUserId = response.userId;
 
                     alert(response.message);
                     updateHeaderWithUsername();
 
-                    //localStorage.getItem("activeUserName");
+                    localStorage.getItem("activeUserName");
                 } else {
                     alert(response.message);
                 }
@@ -264,13 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (response.success) {
                         closeLoginForm();
                         // Збереження userId в локальному сховищі або в сесії
-                        //localStorage.setItem("activeUserId", response.userId);
+                        localStorage.setItem("activeUserId", response.userId);
 
-                        activeUserId = response.userId;
+                        //activeUserId = response.userId;
 
                         alert(response.message);
                         updateHeaderWithUsername();
-                        //localStorage.getItem("activeUserName");
+                        localStorage.getItem("activeUserName");
                     } else {
                         alert(response.message);
                     }
@@ -315,18 +315,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getUsernameById() {
-        //if (localStorage.length > 0) {
-        if (activeUserId){
+        if (localStorage.length > 0) {
+        //if (activeUserId){
             $.ajax({
                 async: false,
                 type: "POST",
-                url: "/Home/GetUsername?userId=" + activeUserId,
-//                    localStorage.getItem("activeUserId"),
+                url: "/Home/GetUsername?userId=" + localStorage.getItem("activeUserId"),
+                //   activeUserId,
                 success: function(response) {
                     if (response.success) {
-                        // localStorage.setItem("activeUserName", response.username);
+                        localStorage.setItem("activeUserName", response.username);
 
-                        activeUserName = response.username;
+                        //activeUserName = response.username;
 
                     } else {
                         alert(response.message);
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateHeaderWithUsername() {
         getUsernameById();
-        //const activeUserName = localStorage.getItem("activeUserName");
+        const activeUserName = localStorage.getItem("activeUserName");
 
         if (activeUserName) {
             // Знаходження контейнера з кнопками
@@ -404,11 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
-
-            document.cookie = `activeUserId=${activeUserId};path=/`;
-            document.cookie = `activeUserName=${activeUserName};path=/`;
-            // Перезавантажте сторінку для застосування змін у cshtml 
-            window.location.reload();
         }
     }
 
