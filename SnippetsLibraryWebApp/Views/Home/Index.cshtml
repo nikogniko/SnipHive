@@ -9,9 +9,9 @@
 
 
 <!-- Модальне вікно Реєстрації -->
-<div id="registerModal" class="modal">
+<div id="registerModal" class="modal" ng-controller="processAuthorization">
     <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
+        <span id="closeModal" class="close" ng-click="closeRegisterModal">&times;</span>
         <h2 class="modal-title">Реєстрація</h2>
         <form id="registerForm">
             <div class="form-group">

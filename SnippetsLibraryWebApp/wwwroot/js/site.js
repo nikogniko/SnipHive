@@ -9,10 +9,19 @@ app.controller('processAuthorization', function($scope, $rootScope){
 
     $rootScope.updateHeaderWithUsername = updateHeaderWithUsername;
 
+    $scope.openRegisterModal = function(){
+        document.getElementById('registerModal').registerModal.style.display = 'block';
+    }
+
+    $scope.closeRegisterModal = function(){
+        document.getElementById('registerModal').registerModal.style.display = 'none';
+        clearRegisterErrors();
+    }
+
     // Реєстрація --------------------------------------------------------------------------
 
     const openRegisterModalButton = document.getElementById('openRegisterModal');
-    const registerModal = document.getElementById('registerModal');
+    const registerModal = document.getElementById('registerModal'); //DONE
     const closeModalButton = document.getElementById('closeModal');
 
     const registerButton = document.getElementById('registerButton');
@@ -29,7 +38,7 @@ app.controller('processAuthorization', function($scope, $rootScope){
     const registerPasswordError = document.getElementById('registerPasswordError');
 
     // Відкриття модального вікна
-    openRegisterModalButton.addEventListener('click', () => {
+    openRegisterModalButton.addEventListener('click', () => { //DONE
         registerModal.style.display = 'block';
     });
 
