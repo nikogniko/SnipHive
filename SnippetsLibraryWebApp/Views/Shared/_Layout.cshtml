@@ -4,8 +4,8 @@
     //var userName = HttpContext.Session.GetString("UserName"); // Якщо зберігаєте UserName у сесії
 
     // Або використання ViewBag для передачі даних з дочірніх представлень, якщо це було встановлено
-    var activeUserId = ViewBag.UserId;
-    var activeUserName = ViewBag.UserName;
+    //var activeUserId = ViewBag.UserId;
+    //var activeUserName = ViewBag.UserName;
 }
 
 <!DOCTYPE html>
@@ -49,10 +49,10 @@
                     </li>
                 </ul>
 
-                <ul class="navbar-nav ml-auto align-items-center">
+                <ul class="navbar-nav ml-auto align-items-center" ng-controller="processAuthorization">
                     <li class="nav-item">
                         <!-- Кнопка для відкриття модального вікна Входу -->
-                        <button type="button" id="openLoginModal" class="btn secondary-btn">Увійти</button>
+                        <button type="button" id="openLoginModal" class="btn secondary-btn" ng-click="">Увійти</button>
                     </li>
                     <li class="nav-item">
                         <!-- Кнопка для відкриття модального вікна Реєстрації -->
@@ -73,6 +73,7 @@
             &copy; 2024 - SnipHive - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

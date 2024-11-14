@@ -3,12 +3,11 @@
 
 // Write your JavaScript code.
 
+var app = angular.module('app', []);
 
+app.controller('processAuthorization', function($scope, $rootScope){
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    let activeUserId;
-    let activeUserName;
+    $rootScope.updateHeaderWithUsername = updateHeaderWithUsername;
 
     // Реєстрація --------------------------------------------------------------------------
 
@@ -85,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         removeError(registerPasswordInput, registerPasswordError, 'error');
     });
 
-    // Реєстрація користувача за допомогою fetch
+    // Реєстрація користувача 
     registerButton.addEventListener('click', async () => {
         let isValid = true;
 
@@ -116,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             registerPasswordInput.classList.add('error');
         }
 
-         if (!isValid) {
+        if (!isValid) {
             return;
         }
 
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async: false,
             type: "POST",
             url: '/Home/RegisterUser?username=' + registerUsernameInput.value + '&email=' + registerEmailInput.value + '&password=' + registerPasswordInput.value,
-            success: function (response){
+            success: function (response) {
                 if (response.success) {
                     closeRegisterForm();
 
@@ -135,7 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     //activeUserId = response.userId;
 
                     alert(response.message);
-                    updateHeaderWithUsername();
+
+                    //updateHeaderWithUsername();
+                    $rootScope.updateHeaderWithUsername();
 
                     localStorage.getItem("activeUserName");
                 } else {
@@ -149,15 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Валідація форми
     /*registerButton.addEventListener('click', async () => {
         // Перевірка унікальності користувача
-*//*        const userExists = await checkIfUserExists(usernameInput.value, emailInput.value);
-        if (userExists) {
-            showError('emailError', 'Користувач із таким email або іменем вже існує');
-            emailInput.classList.add('error');
-            return;
-        }*//*
-
-        // Відправка даних на сервер (можна налаштувати на реальний запит)
-        alert('Форма пройшла валідацію');
+    */
+    /*      const userExists = await checkIfUserExists(usernameInput.value, emailInput.value);
+            if (userExists) {
+                showError('emailError', 'Користувач із таким email або іменем вже існує');
+                emailInput.classList.add('error');
+                return;
+            }*/
+            /*
+    // Відправка даних на сервер (можна налаштувати на реальний запит)
+    alert('Форма пройшла валідацію');
     });*/
 
 
@@ -195,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-     // Показ/приховування пароля
+    // Показ/приховування пароля
     const toggleLoginPassword = document.getElementById('toggleLoginPassword');
 
     toggleLoginPassword.addEventListener('click', () => {
@@ -255,12 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isValid) {
             // Тут може бути логіка для входу
             alert('Форма успішно заповнена');
-            
+
             $.ajax({
                 async: false,
                 type: "POST",
                 url: '/Home/LoginUser?email=' + loginEmailInput.value + '&password=' + loginPasswordInput.value,
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         closeLoginForm();
                         // Збереження userId в локальному сховищі або в сесії
@@ -269,7 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         //activeUserId = response.userId;
 
                         alert(response.message);
-                        updateHeaderWithUsername();
+                        //updateHeaderWithUsername();
+                        $rootScope.updateHeaderWithUsername();
+
                         localStorage.getItem("activeUserName");
                     } else {
                         alert(response.message);
@@ -293,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     });
-    
+
 
     function validateEmail(email) {
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -314,247 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function getUsernameById() {
-        if (localStorage.length > 0) {
-        //if (activeUserId){
-            $.ajax({
-                async: false,
-                type: "POST",
-                url: "/Home/GetUsername?userId=" + localStorage.getItem("activeUserId"),
-                //   activeUserId,
-                success: function(response) {
-                    if (response.success) {
-                        localStorage.setItem("activeUserName", response.username);
-
-                        //activeUserName = response.username;
-
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert("An error occurred while trying to fetch the username.");
-                }
-            });
-        }
-        else{
-            alert('Active user not found.')
-        }
-    }
-
-    function updateHeaderWithUsername() {
-        getUsernameById();
-        const activeUserName = localStorage.getItem("activeUserName");
-
-        if (activeUserName) {
-            // Знаходження контейнера з кнопками
-            const navContainer = document.querySelector(".navbar-nav.ml-auto");
-
-            // Створення посилання на сторінку додавання сніпета
-            const addSnippetBtn = document.createElement("li");
-            addSnippetBtn.className = "nav-item";
-
-            addSnippetBtn.innerHTML = `
-                <a href="/AddSnippet/AddSnippet"
-                    id="addSnippetBtn" class="secondary-btn btn-add-snippet">
-                    + Додати сніпет</a>
-            `;
-
-            // Створення випадаючого меню з ім'ям користувача
-            const userDropdown = document.createElement("li");
-            userDropdown.className = "nav-item dropdown";
-    
-            userDropdown.innerHTML = `
-                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    ${activeUserName}
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                    <a class="dropdown-item" href="#" id="logoutButton">Вийти</a>
-                </div>
-            `;
-
-    
-            // Очищення контейнера та додавання нового елементу
-            navContainer.innerHTML = "";
-            navContainer.appendChild(addSnippetBtn);
-            navContainer.appendChild(userDropdown);
-
-            // Додавання обробника для відкриття/розгортання меню
-            document.getElementById("userDropdown").addEventListener("click", function (event) {
-                event.preventDefault(); // Відміняємо стандартну дію
-                const dropdownMenu = this.nextElementSibling;
-                dropdownMenu.classList.toggle("show");
-            });
-
-            // Додавання обробника для кнопки виходу
-            document.getElementById("logoutButton").addEventListener("click", function () {
-                // Очищення локального сховища та перезавантаження сторінки
-                localStorage.removeItem("activeUserId");
-                localStorage.removeItem("activeUserName");
-                location.reload();
-            });
-
-            // Закриття меню при кліку поза ним
-            document.addEventListener("click", function (event) {
-                const isClickInside = userDropdown.contains(event.target);
-                if (!isClickInside) {
-                    const dropdownMenu = document.querySelector(".dropdown-menu");
-                    if (dropdownMenu) {
-                        dropdownMenu.classList.remove("show");
-                    }
-                }
-            });
-        }
-    }
-
-
-    
-    // Масив для зберігання вибраних категорій
-/*    let selectedCategories = [];
-
-    // Ініціалізація елементів DOM
-    const categoriesDropdown = document.getElementById("dropdownList");
-    const selectedCategoriesContainer = document.getElementById("selectedCategories");
-
-    // Створення початкового тексту для вибору категорій
-    const placeholderOption = document.createElement("div");
-    placeholderOption.textContent = "--Оберіть до 3-х категорій--";
-    placeholderOption.classList.add("dropdown-placeholder");
-    categoriesDropdown.before(placeholderOption);
-
-    // Додавання слухача подій для відкриття комбобоксу
-    placeholderOption.addEventListener("click", () => {
-        categoriesDropdown.style.display = categoriesDropdown.style.display === "block" ? "none" : "block";
-    });
-
-    // Оновлення категорій у випадаючому меню
-    categoriesDropdown.addEventListener("change", (event) => {
-        const selectedOption = event.target.options[event.target.selectedIndex];
-
-        // Перевірка чи категорія вже вибрана
-        if (!selectedCategories.includes(selectedOption.value) && selectedCategories.length < 3) {
-            // Додавання вибраної категорії
-            selectedCategories.push(selectedOption.value);
-
-            // Відображення вибраної категорії як "кнопки"
-            const categoryButton = document.createElement("div");
-            categoryButton.classList.add("category-chip");
-            categoryButton.textContent = selectedOption.text;
-            selectedCategoriesContainer.appendChild(categoryButton);
-
-            // Додавання кнопки закриття (хрестик)
-            const closeButton = document.createElement("span");
-            closeButton.classList.add("close-button");
-            closeButton.textContent = "✖";
-            categoryButton.appendChild(closeButton);
-
-            // Слухач для видалення вибраної категорії
-            closeButton.addEventListener("click", () => {
-                selectedCategories = selectedCategories.filter((id) => id !== selectedOption.value);
-                categoryButton.remove();
-
-                // Зняття вибору у списку
-                selectedOption.selected = false;
-            });
-        } else if (selectedCategories.length >= 3) {
-            alert("Ви можете обрати не більше 3 категорій.");
-            event.target.value = ""; // Скидання вибору
-        }
-    });
-        
-    // Закриття списку після вибору
-    categoriesDropdown.style.display = "none";
-
-    // CSS-класи для стилізації
-    const style = document.createElement("style");
-    style.textContent = `
-        .category-chip {
-          display: inline-block;
-          padding: 5px 10px;
-          margin: 5px;
-          border: 2px solid darkgreen;
-          border-radius: 20px;
-          background-color: white;
-          color: darkgreen;
-          font-size: 14px;
-          cursor: pointer;
-        }
-        .category-chip .close-button {
-          margin-left: 8px;
-          color: gray;
-          cursor: pointer;
-        }
-        .dropdown-placeholder {
-          cursor: pointer;
-          color: #555;
-          margin-bottom: 5px;
-        }
-        #Categories {
-          display: none;
-          margin-top: 5px;
-        }
-    `;
-    document.head.appendChild(style);*/
-
-    document.addEventListener("DOMContentLoaded", updateHeaderWithUsername);
-
-    const categoryDropdown = document.getElementById('categoryDropdown');
-    const dropdownPlaceholder = document.querySelector('.dropdown-placeholder');
-    const dropdownList = document.getElementById('dropdownList');
-    const selectedCategories = document.getElementById('selectedCategories');
-    let selectedCategoriesList = [];
-
-    dropdownPlaceholder.addEventListener('click', () => {
-        dropdownList.style.display = dropdownList.style.display === 'block' ? 'none' : 'block';
-    });
-
-    dropdownList.addEventListener('change', (event) => {
-        const checkbox = event.target;
-        const categoryName = checkbox.nextElementSibling.textContent;
-
-        if (checkbox.checked) {
-            if (selectedCategoriesList.length < 3) {
-                addCategory(checkbox.value, categoryName);
-            } else {
-                checkbox.checked = false;
-                alert('Ви не можете обрати більше 3-х категорій');
-            }
-        } else {
-            removeCategory(checkbox.value);
-        }
-    });
-
-    function addCategory(id, name) {
-        selectedCategoriesList.push(id);
-        const categoryElement = document.createElement('div');
-        categoryElement.className = 'selected-category';
-        categoryElement.setAttribute('data-id', id);
-        categoryElement.innerHTML = `${name}<span class="remove-icon">x</span>`;
-
-        categoryElement.querySelector('.remove-icon').addEventListener('click', () => {
-            removeCategory(id);
-            document.querySelector(`input[value="${id}"]`).checked = false;
-        });
-
-        selectedCategories.appendChild(categoryElement);
-    }
-
-    function removeCategory(id) {
-        selectedCategoriesList = selectedCategoriesList.filter(categoryId => categoryId !== id);
-        const categoryElement = document.querySelector(`.selected-category[data-id="${id}"]`);
-        if (categoryElement) {
-            selectedCategories.removeChild(categoryElement);
-        }
-    }
-
-    // Закриття випадаючого меню при натисканні за межами меню
-    document.addEventListener('click', (event) => {
-        if (!categoryDropdown.contains(event.target)) {
-            dropdownList.style.display = 'none';
-        }
-    });
-
-
     async function checkIfUserExists(username, email) {
         // Тут відбудеться запит до бази для перевірки існування користувача
         // Наприклад:
@@ -569,4 +332,267 @@ document.addEventListener('DOMContentLoaded', () => {
         // Тимчасове значення для демонстрації
         return false;
     }
+})
+
+
+app.controller('processAddSnippetPage', function($scope, $rootScope){
+    // Масив для зберігання вибраних категорій
+    /*    let selectedCategories = [];
+    
+        // Ініціалізація елементів DOM
+        const categoriesDropdown = document.getElementById("dropdownList");
+        const selectedCategoriesContainer = document.getElementById("selectedCategories");
+    
+        // Створення початкового тексту для вибору категорій
+        const placeholderOption = document.createElement("div");
+        placeholderOption.textContent = "--Оберіть до 3-х категорій--";
+        placeholderOption.classList.add("dropdown-placeholder");
+        categoriesDropdown.before(placeholderOption);
+    
+        // Додавання слухача подій для відкриття комбобоксу
+        placeholderOption.addEventListener("click", () => {
+            categoriesDropdown.style.display = categoriesDropdown.style.display === "block" ? "none" : "block";
+        });
+    
+        // Оновлення категорій у випадаючому меню
+        categoriesDropdown.addEventListener("change", (event) => {
+            const selectedOption = event.target.options[event.target.selectedIndex];
+    
+            // Перевірка чи категорія вже вибрана
+            if (!selectedCategories.includes(selectedOption.value) && selectedCategories.length < 3) {
+                // Додавання вибраної категорії
+                selectedCategories.push(selectedOption.value);
+    
+                // Відображення вибраної категорії як "кнопки"
+                const categoryButton = document.createElement("div");
+                categoryButton.classList.add("category-chip");
+                categoryButton.textContent = selectedOption.text;
+                selectedCategoriesContainer.appendChild(categoryButton);
+    
+                // Додавання кнопки закриття (хрестик)
+                const closeButton = document.createElement("span");
+                closeButton.classList.add("close-button");
+                closeButton.textContent = "✖";
+                categoryButton.appendChild(closeButton);
+    
+                // Слухач для видалення вибраної категорії
+                closeButton.addEventListener("click", () => {
+                    selectedCategories = selectedCategories.filter((id) => id !== selectedOption.value);
+                    categoryButton.remove();
+    
+                    // Зняття вибору у списку
+                    selectedOption.selected = false;
+                });
+            } else if (selectedCategories.length >= 3) {
+                alert("Ви можете обрати не більше 3 категорій.");
+                event.target.value = ""; // Скидання вибору
+            }
+        });
+            
+        // Закриття списку після вибору
+        categoriesDropdown.style.display = "none";
+    
+        // CSS-класи для стилізації
+        const style = document.createElement("style");
+        style.textContent = `
+            .category-chip {
+              display: inline-block;
+              padding: 5px 10px;
+              margin: 5px;
+              border: 2px solid darkgreen;
+              border-radius: 20px;
+              background-color: white;
+              color: darkgreen;
+              font-size: 14px;
+              cursor: pointer;
+            }
+            .category-chip .close-button {
+              margin-left: 8px;
+              color: gray;
+              cursor: pointer;
+            }
+            .dropdown-placeholder {
+              cursor: pointer;
+              color: #555;
+              margin-bottom: 5px;
+            }
+            #Categories {
+              display: none;
+              margin-top: 5px;
+            }
+        `;
+        document.head.appendChild(style);*/
+
+        //$rootScope.updateHeaderWithUsername();
+
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        const dropdownPlaceholder = document.querySelector('.dropdown-placeholder');
+        const dropdownList = document.getElementById('dropdownList');
+        const selectedCategories = document.getElementById('selectedCategories');
+        let selectedCategoriesList = [];
+    
+        dropdownPlaceholder.addEventListener('click', () => {
+            dropdownList.style.display = dropdownList.style.display === 'block' ? 'none' : 'block';
+        });
+    
+        dropdownList.addEventListener('change', (event) => {
+            const checkbox = event.target;
+            const categoryName = checkbox.nextElementSibling.textContent;
+    
+            if (checkbox.checked) {
+                if (selectedCategoriesList.length < 3) {
+                    addCategory(checkbox.value, categoryName);
+                } else {
+                    checkbox.checked = false;
+                    alert('Ви не можете обрати більше 3-х категорій');
+                }
+            } else {
+                removeCategory(checkbox.value);
+            }
+        });
+    
+        function addCategory(id, name) {
+            selectedCategoriesList.push(id);
+            const categoryElement = document.createElement('div');
+            categoryElement.className = 'selected-category';
+            categoryElement.setAttribute('data-id', id);
+            categoryElement.innerHTML = `${name}<span class="remove-icon">x</span>`;
+    
+            categoryElement.querySelector('.remove-icon').addEventListener('click', () => {
+                removeCategory(id);
+                document.querySelector(`input[value="${id}"]`).checked = false;
+            });
+    
+            selectedCategories.appendChild(categoryElement);
+        }
+    
+        function removeCategory(id) {
+            selectedCategoriesList = selectedCategoriesList.filter(categoryId => categoryId !== id);
+            const categoryElement = document.querySelector(`.selected-category[data-id="${id}"]`);
+            if (categoryElement) {
+                selectedCategories.removeChild(categoryElement);
+            }
+        }
+    
+        // Закриття випадаючого меню при натисканні за межами меню
+        document.addEventListener('click', (event) => {
+            if (!categoryDropdown.contains(event.target)) {
+                dropdownList.style.display = 'none';
+            }
+        });
+})
+
+/*document.addEventListener('DOMContentLoaded', () => {
+    updateHeaderWithUsername();
+    processAddSnippetPage();
 });
+*/
+let activeUserId;
+let activeUserName;
+
+function getUsernameById() {
+    if (localStorage.length > 0) {
+        //if (activeUserId){
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "/Home/GetUsername?userId=" + localStorage.getItem("activeUserId"),
+            //   activeUserId,
+            success: function (response) {
+                if (response.success) {
+                    localStorage.setItem("activeUserName", response.username);
+
+                    //activeUserName = response.username;
+
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("An error occurred while trying to fetch the username.");
+            }
+        });
+    }
+    else {
+        alert('Active user not found.')
+    }
+}
+
+function updateHeaderWithUsername() {
+    getUsernameById();
+    const activeUserName = localStorage.getItem("activeUserName");
+
+    if (activeUserName) {
+        // Знаходження контейнера з кнопками
+        const navContainer = document.querySelector(".navbar-nav.ml-auto");
+
+        // Створення посилання на сторінку додавання сніпета
+        const addSnippetBtn = document.createElement("li");
+        addSnippetBtn.className = "nav-item";
+
+        addSnippetBtn.innerHTML = `
+            <a href="/AddSnippet/AddSnippet"
+                id="addSnippetBtn" class="secondary-btn btn-add-snippet">
+                + Додати сніпет</a>
+        `;
+
+        // Створення випадаючого меню з ім'ям користувача
+        const userDropdown = document.createElement("li");
+        userDropdown.className = "nav-item dropdown";
+
+        userDropdown.innerHTML = `
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                ${activeUserName}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                <a class="dropdown-item" href="#" id="logoutButton">Вийти</a>
+            </div>
+        `;
+
+
+        // Очищення контейнера та додавання нового елементу
+        navContainer.innerHTML = "";
+        navContainer.appendChild(addSnippetBtn);
+        navContainer.appendChild(userDropdown);
+
+        // Додавання обробника для відкриття/розгортання меню
+        document.getElementById("userDropdown").addEventListener("click", function (event) {
+            event.preventDefault(); // Відміняємо стандартну дію
+            const dropdownMenu = this.nextElementSibling;
+            dropdownMenu.classList.toggle("show");
+        });
+
+        // Додавання обробника для кнопки виходу
+        document.getElementById("logoutButton").addEventListener("click", function () {
+            // Очищення локального сховища та перезавантаження сторінки
+            localStorage.removeItem("activeUserId");
+            localStorage.removeItem("activeUserName");
+            location.reload();
+        });
+
+        // Закриття меню при кліку поза ним
+        document.addEventListener("click", function (event) {
+            const isClickInside = userDropdown.contains(event.target);
+            if (!isClickInside) {
+                const dropdownMenu = document.querySelector(".dropdown-menu");
+                if (dropdownMenu) {
+                    dropdownMenu.classList.remove("show");
+                }
+            }
+        });
+    }
+}
+
+function processAuthorization() {
+    
+}
+
+
+function processAddSnippetPage() {
+   
+
+}
+
+function processIndex() {
+
+}
