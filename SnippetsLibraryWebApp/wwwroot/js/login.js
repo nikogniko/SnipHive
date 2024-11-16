@@ -1,6 +1,7 @@
 ﻿// wwwroot/js/login.js
 
 $(document).ready(function () {
+
     // Function to close the login modal
     $('.close-login-modal').on('click', function () {
         $('#loginModal').fadeOut();
@@ -9,10 +10,9 @@ $(document).ready(function () {
 
     // Function to toggle password visibility
     $('.toggle-login-password').on('click', function () {
-        var passwordInput = $('#loginPassword');
-        var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
-        passwordInput.attr('type', type);
-        $(this).text(type === 'password' ? '👁️' : '👁️‍🗨️');
+        var loginInput = $('#loginPassword');
+        var type = loginInput.attr('type') === 'password' ? 'text' : 'password';
+        loginInput.attr('type', type);
     });
 
     // Function to handle login form submission
@@ -28,26 +28,35 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            type: 'POST',
+            type: 'GET',
             url: '/Home/LoginUser',
             data: {
                 email: email,
                 password: password
             },
-            success: function (response) {
-                if (response.success) {
-                    // Save user info to localStorage
-                    localStorage.setItem("activeUserId", response.userId);
-                    localStorage.setItem("activeUserName", response.username);
+            success: function (responseLogin) {
+                if (responseLogin.success) {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/Home/GetUsername',
+                        data: {
+                            userId: responseLogin.userId
+                        },
+                        success: function (responseGetUsername) {
+                            // Save user info to localStorage
+                            localStorage.setItem("activeUserId", responseLogin.userId);
+                            localStorage.setItem("activeUserName", responseGetUsername.username);
 
-                    // Update UI
-                    updateAuthUI(true, response.username);
+                            // Update UI
+                            updateAuthUI(true, responseGetUsername.username);
 
-                    // Close modal
-                    $('#loginModal').fadeOut();
-                    resetLoginForm();
+                            // Close modal
+                            $('#loginModal').fadeOut();
+                            resetLoginForm();
+                        }
+                    })
                 } else {
-                    alert(response.message);
+                    alert(responseLogin.message);
                 }
             },
             error: function () {

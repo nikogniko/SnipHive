@@ -21,7 +21,7 @@
                 <div class="form-group">
                     <label for="ProgrammingLanguageID">Мова програмування <span class="required">*</span></label>
                     <!-- form-control  -->
-                    <select class="select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID"  required>
+                    <select class="select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID" required>
                         <option value="" selected>-- Оберіть мову --</option>
                         @foreach (var language in await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync())
                         {
@@ -67,7 +67,7 @@
                     <div id="tagDropdown" class="custom-dropdown">
                         <span class="dropdown-placeholder">--Оберіть теги--</span>
                         <div id="dropdownTagList" class="dropdown-content">
-                        @foreach (var tag in await _tagRepository.GetAllTagsAsync())
+                            @foreach (var tag in await _tagRepository.GetAllTagsAsync())
                             {
                                 <label class="checkbox-label">
                                     <input type="checkbox" class="tag-checkbox" value="@tag.ID" />
@@ -84,7 +84,7 @@
                         <input type="text" class="form-control" id="addTag" name="addTag" placeholder="Додайте власний тег за потреби..." />
                         <button type="button" id="addTagBtn" class="btn secondary-btn">Додати</button>
                     </div>
-                </div>            
+                </div>
 
                 <div class="form-group form-buttons">
                     <button type="submit" class="btn primary-btn">Зберегти</button>

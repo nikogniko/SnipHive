@@ -1,14 +1,4 @@
-﻿@{
-    ViewData["Title"] = "All snippets";
-}
-
-@* <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div> *@
-
-
-<!-- Модальне вікно Реєстрації -->
+﻿<!-- Registration Modal -->
 <div id="registerModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close close-register-modal">&times;</span>
@@ -16,56 +6,62 @@
         <form id="registerForm">
             <div class="form-group">
                 <label for="registerUsername">Нікнейм</label>
-                <input type="text" id="registerUsername" name="registerUsername" class="form-input" required />
-                <small class="error-message" id="registerUsernameError"></small>
+                <input type="text" id="registerUsername" name="registerUsername" class="form-input" required minlength="3" />
+                <small class="error-message" style="display: none; color: red;">
+                    Нікнейм користувача повинен містити мінімум 3 символи
+                </small>
             </div>
             <div class="form-group">
                 <label for="registerEmail">Email</label>
                 <input type="email" id="registerEmail" name="registerEmail" class="form-input" required />
-                <small class="error-message" id="registerEmailError"></small>
+                <small class="error-message" style="display: none; color: red;">
+                    Введіть коректну адресу електронної пошти
+                </small>
             </div>
             <div class="form-group password-group">
                 <label for="registerPassword">Пароль</label>
                 <div class="password-wrapper">
                     <input type="password" id="registerPassword" name="registerPassword" class="form-input" required minlength="8" maxlength="25" />
                 </div>
-                <small class="error-message" id="registerPasswordError"></small>
+                <small class="error-message" style="display: none; color: red;">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
             </div>
             <div class="register-btns-group">
-                <button type="button" id="btn-to-login" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
-                <button type="button" id="registerButton" class="primary-btn btn-form-register">Зареєструватися</button>
+                <button type="button" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
+                <button type="submit" class="primary-btn btn-form-register">Зареєструватися</button>
             </div>
         </form>
     </div>
 </div>
 
-
-
-<!-- Модальне вікно для входу -->
+<!-- Login Modal -->
 <div id="loginModal" class="modal" style="display: none;">
     <div class="modal-content">
-        <span id="closeLoginModal" class="close">&times;</span>
+        <span class="close close-login-modal">&times;</span>
         <h2 class="modal-title">Вхід в систему</h2>
         <form id="loginForm">
             <div class="form-group">
                 <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" name="loginEmail" class="form-input" required />
-                <small class="error-message" id="loginEmailError"></small>
+                <small class="error-message" style="display: none; color: red;">
+                    Введіть коректну адресу електронної пошти
+                </small>
             </div>
             <div class="form-group password-group">
                 <label for="loginPassword">Пароль</label>
                 <div class="password-wrapper">
-                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required />
-                    <span id="toggleLoginPassword" class="toggle-password">👁️</span>
+                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required minlength="8" maxlength="25" />
                 </div>
-                <small class="error-message" id="loginPasswordError"></small>
+                <small class="error-message" style="display: none; color: red;">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
             </div>
             <a href="#" class="forgot-password">Забули пароль?</a>
             <div class="register-btns-group">
-                <button type="button" id="btn-to-register" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
-                <button type="button" id="loginButton" class="primary-btn">Увійти</button>
+                <button type="button" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
+                <button type="submit" class="primary-btn">Увійти</button>
             </div>
         </form>
     </div>
 </div>
-

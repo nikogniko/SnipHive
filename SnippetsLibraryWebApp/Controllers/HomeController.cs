@@ -37,7 +37,7 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             try
             {
-                // Витягування ніку користувача з моделі
+                // ??????????? ???? ??????????? ? ??????
                 string username = await _userRepository.GetUsernameByIdAsync(userId);
 
                 if (!string.IsNullOrEmpty(username))
@@ -61,7 +61,7 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             try
             {
-                // Перевірка на порожні значення
+                // ????????? ?? ??????? ????????
                 if (string.IsNullOrEmpty(username))
                 {
                     return Json(new { success = false, message = "Username cannot be empty" });
@@ -77,7 +77,7 @@ namespace SnippetsLibraryWebApp.Controllers
                     return Json(new { success = false, message = "Password cannot be empty" });
                 }
 
-                // Спроба зареєструвати користувача
+                // ?????? ????????????? ???????????
                 int? userId = await _userRepository.AddUserAsync(username, email, password);
 
                 if (userId.HasValue)
@@ -100,7 +100,7 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             try
             {
-                // Перевірка на порожні значення
+                // ????????? ?? ??????? ????????
                 if (string.IsNullOrEmpty(email))
                 {
                     return Json(new { success = false, message = "Email cannot be empty" });
@@ -111,12 +111,12 @@ namespace SnippetsLibraryWebApp.Controllers
                     return Json(new { success = false, message = "Password cannot be empty" });
                 }
 
-                // Спроба авторизації користувача
+                // ?????? ??????????? ???????????
                 int? userId = await _userRepository.GetUserIdAsync(email, password);
 
                 if (userId.HasValue)
                 {
-                    // Успішна авторизація - передаємо ID користувача
+                    // ??????? ??????????? - ????????? ID ???????????
                     return Json(new { success = true, message = "Login successful", userId = userId.Value });
                 }
                 else

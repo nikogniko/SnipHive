@@ -611,10 +611,12 @@ input[type="radio"]:checked + .toggle-label {
         cursor: pointer;
     }
 
-.add-tag-container{
+.add-tag-container {
     display: flex;
     gap: 5px;
 }
+
+
 
 /* Стилі для блоку коду */
 .code-editor-container {

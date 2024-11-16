@@ -12,7 +12,6 @@ $(document).ready(function () {
         var passwordInput = $('#registerPassword');
         var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
         passwordInput.attr('type', type);
-        $(this).text(type === 'password' ? '👁️' : '👁️‍🗨️');
     });
 
     // Function to handle registration form submission
