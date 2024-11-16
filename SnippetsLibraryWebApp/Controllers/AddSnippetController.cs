@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SnippetsLibraryWebApp.Models;
+using SnippetsLibraryWebApp.Repository;
 using System.Diagnostics;
 
 namespace SnippetsLibraryWebApp.Controllers
@@ -9,19 +10,71 @@ namespace SnippetsLibraryWebApp.Controllers
     {
         public class AddSnippetController : Controller
         {
+            private readonly SnippetRepository _snippetRepository;
+
+            public AddSnippetController(SnippetRepository snippetRepository)
+            {
+                _snippetRepository = snippetRepository;
+            }
+
             // Дія для відкриття сторінки додавання сніпета
             //[HttpGet]
             public IActionResult AddSnippet()
             {
-                // Підготовка даних для заповнення форми
-                /*var model = new AddSnippet
-                {
-                    Languages = GetProgrammingLanguages(),
-                    Categories = GetAvailableCategories(),
-                    Tags = GetAvailableTags()
-                };*/
                 return View();
             }
+
+            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+            public IActionResult Error()
+            {
+                return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
+
+            [HttpPost]
+            //[Route("api/snippets/add")]
+            public async Task<IActionResult> AddSnippetAsync( string title, string description, int languageID, string code, 
+                string status,  List<CategoryModel> categories, List<TagModel> tags, int userID)
+            {
+                // Перевіряємо, чи запит містить необхідні дані
+/*                if (request == null || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Code))
+                {
+                    return BadRequest("Invalid request data.");
+                }*/
+
+                //  ------метод валідації даних в жсі зробити--------
+
+                try
+                {
+                    // Отримуємо ідентифікатор користувача (наприклад, з токена аутентифікації)
+                    //int userId = GetUserIdFromToken(); // Реалізуйте метод для отримання ідентифікатора користувача
+
+                    // Створюємо новий об'єкт SnippetModel з вхідними даними
+                    var newSnippet = new SnippetModel
+                    {
+                        Title = title,
+                        Description = description,
+                        ProgrammingLanguageID = languageID,
+                        Code = code,
+                        Status = status,
+                        AuthorID = userID,
+                        Categories = categories,
+                        Tags = tags
+                    };
+
+                    // Додаємо сніпет до бази даних
+                    var snippetId = await  _snippetRepository.AddSnippetAsync(newSnippet);
+
+                    // Повертаємо успішну відповідь з ID нового сніпета
+                    return Ok(new { SnippetID = snippetId });
+                }
+                catch (Exception ex)
+                {
+                    // Логування помилки
+                    Console.WriteLine($"Error while adding snippet: {ex.Message}");
+                    return StatusCode(500, "An error occurred while adding the snippet.");
+                }
+            }
+
 
             // Дія для обробки додавання нового сніпета
             /*[HttpPost]
@@ -41,43 +94,9 @@ namespace SnippetsLibraryWebApp.Controllers
                 return View(model);
             }*/
 
-            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-            public IActionResult Error()
-            {
-                return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-            }
 
-            // Приклад методів отримання списків мов, категорій та тегів
-            private List<SelectListItem> GetProgrammingLanguages()
-            {
-                // Отримання списку мов (можна змінити на запит до БД)
-                return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "C#" },
-                new SelectListItem { Value = "2", Text = "JavaScript" },
-                new SelectListItem { Value = "3", Text = "Python" }
-            };
-            }
 
-            private List<SelectListItem> GetAvailableCategories()
-            {
-                // Отримання списку категорій (можна змінити на запит до БД)
-                return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Web Development" },
-                new SelectListItem { Value = "2", Text = "Data Science" }
-            };
-            }
 
-            private List<SelectListItem> GetAvailableTags()
-            {
-                // Отримання списку тегів (можна змінити на запит до БД)
-                return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Machine Learning" },
-                new SelectListItem { Value = "2", Text = "Frontend" }
-            };
-            }
         }
     }
 

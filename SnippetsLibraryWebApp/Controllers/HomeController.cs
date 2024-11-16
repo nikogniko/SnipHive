@@ -32,13 +32,13 @@ namespace SnippetsLibraryWebApp.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        [HttpPost]
-        public IActionResult GetUsername(int userId)
+        [HttpGet]
+        public async Task<IActionResult> GetUsername(int userId)
         {
             try
             {
                 // Витягування ніку користувача з моделі
-                string? username = _userRepository.GetUsernameById(userId);
+                string username = await _userRepository.GetUsernameByIdAsync(userId);
 
                 if (!string.IsNullOrEmpty(username))
                 {
@@ -57,7 +57,7 @@ namespace SnippetsLibraryWebApp.Controllers
 
 
         [HttpPost]
-        public IActionResult RegisterUser(string username, string email, string password)
+        public async Task<IActionResult> RegisterUser(string username, string email, string password)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace SnippetsLibraryWebApp.Controllers
                 }
 
                 // Спроба зареєструвати користувача
-                int? userId = _userRepository.AddUser(username, email, password);
+                int? userId = await _userRepository.AddUserAsync(username, email, password);
 
                 if (userId.HasValue)
                 {
@@ -95,8 +95,8 @@ namespace SnippetsLibraryWebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public IActionResult LoginUser(string email, string password)
+        [HttpGet]
+        public async Task<IActionResult> LoginUser(string email, string password)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace SnippetsLibraryWebApp.Controllers
                 }
 
                 // Спроба авторизації користувача
-                int? userId = _userRepository.GetUserId(email, password);
+                int? userId = await _userRepository.GetUserIdAsync(email, password);
 
                 if (userId.HasValue)
                 {

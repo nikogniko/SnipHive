@@ -14,7 +14,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ProgrammingLanguageRepository>();
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<TagRepository>();
-builder.Services.AddScoped<SnippetModel>();
+builder.Services.AddScoped<SnippetRepository>();
 
 
 var app = builder.Build();
@@ -40,5 +40,21 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "addSnippet",
     pattern: "{controller=AddSnippet}/{action=AddSnippet}/{id?}");
+
+app.MapControllerRoute(
+    name: "editSnippet",
+    pattern: "{controller=EditSnippet}/{action=EditSnippet}/{id?}");
+
+app.MapControllerRoute(
+    name: "snippetDetails", 
+    pattern: "{controlle=SnippetDetails}/{action=SnippetDetails}/{id?}");
+
+app.MapControllerRoute(
+    name: "personalSnippets",
+    pattern: "{controlle=PersonalSnippets}/{action=PersonalSnippets}/{id?}");
+
+app.MapControllerRoute(
+    name: "savedSnippets",
+    pattern: "{controlle=SavedSnippets}/{action=SavedSnippets}/{id?}");
 
 app.Run();

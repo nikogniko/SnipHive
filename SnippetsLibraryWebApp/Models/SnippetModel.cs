@@ -24,21 +24,22 @@
                 // Дозволяє тільки "Public" або "Private"
                 if (value.ToLower() == "public" || value.ToLower() == "private")
                 {
-                    _status = value;
+                    _status = value.ToLower();
                 }
                 else
                 {
-                    throw new ArgumentException("Status can only be 'Public' or 'Private'.");
+                    throw new ArgumentException("Status can only be 'public' or 'private'.");
                 }
             }
         }
 
+        public int SavesCount { get; set; }
+
         // Список категорій
-        public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+        public IEnumerable<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
 
         // Список тегів
-        public List<TagModel> Tags { get; set; } = new List<TagModel>();
-
+        public IEnumerable<TagModel> Tags { get; set; } = new List<TagModel>();
 
     }
 }

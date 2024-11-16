@@ -7,7 +7,7 @@ namespace SnippetsLibraryWebApp.Repository
 {
     public class TagRepository
     {
-        public IEnumerable<TagModel> GetAllTags()
+        public async Task<IEnumerable<TagModel>> GetAllTagsAsync()
         {
             try
             {
@@ -15,17 +15,17 @@ namespace SnippetsLibraryWebApp.Repository
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string query = "SELECT ID, Name FROM Tag";
-                    return connection.Query<TagModel>(query);
+                    return await connection.QueryAsync<TagModel>(query);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error while getting tags: " + ex.Message);
+                Console.WriteLine("Error while getting all tags: " + ex.Message);
                 return null;
             }
         }
 
-        public IEnumerable<TagModel> GetTagsBySnippetId(int snippetId)
+        public async Task<IEnumerable<TagModel>> GetTagsBySnippetIdAsync(int snippetId)
         {
             try
             {
@@ -33,60 +33,70 @@ namespace SnippetsLibraryWebApp.Repository
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string query = @"
-                        SELECT t.ID, t.Name
-                        FROM Tag t
-                        INNER JOIN SnippetTag st ON t.ID = st.TagID
-                        WHERE st.SnippetID = @SnippetId";
-
-                    return connection.Query<TagModel>(query, new { SnippetId = snippetId });
+                        SELECT Tag.ID, Tag.Name 
+                        FROM SnippetTag
+                        INNER JOIN Tag ON SnippetTag.TagID = Tag.ID
+                        WHERE SnippetID = @CurrentSnippetID;
+                    ";
+                    var tags = await connection.QueryAsync<TagModel>(query, new { CurrentSnippetID = snippetId });
+                    return tags;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error while getting tags: " + ex.Message);
+                Console.WriteLine("Error while getting tags by snippet id: " + ex.Message);
                 return null;
             }
         }
 
-        public bool AddTagForSnippet(int snippetId, string tagName)
+        public async Task AddSnippetTagsAsync(int snippetId, IEnumerable<TagModel> tags, SqlConnection connection, SqlTransaction transaction)
         {
-            try
+            foreach (var tag in tags)
             {
-                string connectionString = ConfigurationHelper.GetConnectionString();
-                using (var connection = new SqlConnection(connectionString))
+                // Перевірка, чи існує тег
+                string checkTagSql = "SELECT ID FROM Tag WHERE Name = @Name";
+                int? tagId = await connection.QueryFirstOrDefaultAsync<int?>(checkTagSql, new { Name = tag.Name }, transaction);
+
+                // Якщо тег не існує, додаємо його
+                if (tagId == null)
                 {
-                    connection.Open();
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        // Перевірка, чи існує вже тег з таким ім'ям
-                        string checkTagQuery = "SELECT ID FROM Tag WHERE Name = @Name";
-                        int? tagId = connection.QueryFirstOrDefault<int>(checkTagQuery, new { Name = tagName }, transaction);
-
-                        // Якщо тег не існує, додаємо його
-                        if (tagId == 0)
-                        {
-                            string insertTagQuery = "INSERT INTO Tag (Name) VALUES (@Name); SELECT CAST(SCOPE_IDENTITY() as int)";
-                            tagId = connection.QuerySingle<int>(insertTagQuery, new { Name = tagName }, transaction);
-                        }
-
-                        // Додавання зв’язку між тегом та сніпетом у таблицю SnippetTag
-                        string insertSnippetTagQuery = "INSERT INTO SnippetTag (SnippetID, TagID) VALUES (@SnippetID, @TagID)";
-                        connection.Execute(insertSnippetTagQuery, new { SnippetID = snippetId, TagID = tagId }, transaction);
-
-                        // Завершення транзакції
-                        transaction.Commit();
-                    }
-
-                    return true;
+                    string insertTagSql = "INSERT INTO Tag (Name) VALUES (@Name); SELECT CAST(SCOPE_IDENTITY() as int)";
+                    tagId = await connection.QuerySingleAsync<int>(insertTagSql, new { Name = tag.Name }, transaction);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error while adding tag: " + ex.Message);
-                return false;
+
+                // Додавання зв’язку між сніпетом і тегом
+                string insertSnippetTagSql = "INSERT INTO SnippetTag (SnippetID, TagID) VALUES (@SnippetID, @TagID)";
+                await connection.ExecuteAsync(insertSnippetTagSql, new { SnippetID = snippetId, TagID = tagId }, transaction);
             }
         }
 
 
+        private async Task<bool> AreTagsChangedAsync(int snippetId, IEnumerable<TagModel> newTags)
+        {
+            var existingTags = await GetTagsBySnippetIdAsync(snippetId);
+            var existingTagIds = new HashSet<int>(existingTags.Select(t => t.ID));
+            var newTagIds = new HashSet<int>(newTags.Select(t => t.ID));
+
+            return !existingTagIds.SetEquals(newTagIds);
+        }
+
+        public async Task<bool> UpdateSnippetTagsAsync(int snippetId, IEnumerable<TagModel> tags, SqlConnection connection, SqlTransaction transaction)
+        {
+            // Перевірка та оновлення тегів, якщо необхідно
+            if (await AreTagsChangedAsync(snippetId, tags))
+            {
+                // Видалення старих зв'язків
+                string deleteTagsSql = "DELETE FROM SnippetTag WHERE SnippetID = @SnippetID";
+                await connection.ExecuteAsync(deleteTagsSql, new { SnippetID = snippetId }, transaction);
+
+                // Додавання нових зв'язків
+                await AddSnippetTagsAsync(snippetId, tags, connection, transaction);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

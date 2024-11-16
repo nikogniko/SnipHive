@@ -15,13 +15,14 @@
             <form asp-action="AddSnippet" method="post">
                 <div class="form-group">
                     <label for="Title">Назва <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="Title" name="Title" required />
+                    <input type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required />
                 </div>
 
                 <div class="form-group">
                     <label for="ProgrammingLanguageID">Мова програмування <span class="required">*</span></label>
-                    <select class="form-control select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID" required>
-                        @foreach (var language in _programmingLanguageRepository.GetAllProgrammingLanguages())
+                    <select class="form-control select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID"  required>
+                        <option value="" selected>-- Оберіть мову --</option>
+                        @foreach (var language in await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync())
                         {
                             <option value="@language.ID">@language.Name</option>
                         }
@@ -40,15 +41,15 @@
 
                 <div class="form-group">
                     <label for="Description">Опис</label>
-                    <textarea class="form-control" id="Description" name="Description"></textarea>
+                    <textarea class="form-control" id="Description" name="Description" placeholder="Опишіть, що виконує даний сніпет..."></textarea>
                 </div>
 
                 <div class="form-group category-select-container">
                     <label for="Categories">Категорії</label>
                     <div id="categoryDropdown" class="custom-dropdown">
-                        <span class="dropdown-placeholder">--Оберіть до 3-х категорій--</span>
+                        <span class="dropdown-placeholder">-- Оберіть до 3-х категорій --</span>
                         <div id="dropdownList" class="dropdown-content">
-                            @foreach (var category in _categoryRepository.GetAllCategories())
+                            @foreach (var category in await _categoryRepository.GetAllCategoriesAsync())
                             {
                                 <label class="checkbox-label">
                                     <input type="checkbox" class="category-checkbox" value="@category.ID" />
@@ -62,8 +63,8 @@
 
                 <div class="form-group">
                     <label>Теги</label>
-                    <select class="form-control select-search" id="Tags" name="Tags" multiple>
-                        @foreach (var tag in _tagRepository.GetAllTags())
+                    <select class="select-search" id="Tags" name="Tags" multiple>
+                        @foreach (var tag in await _tagRepository.GetAllTagsAsync())
                         {
                             <option value="@tag.ID">@tag.Name</option>
                         }

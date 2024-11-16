@@ -8,7 +8,7 @@ namespace SnippetsLibraryWebApp.Repository
 {
     public class UserRepository
     {  
-        public string? GetUsernameById(int userId)
+        public async Task<string> GetUsernameByIdAsync(int userId)
         {
             try
             {
@@ -16,7 +16,7 @@ namespace SnippetsLibraryWebApp.Repository
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string query = "SELECT Username FROM [User] WHERE ID = @UserId";
-                    var username = connection.QueryFirstOrDefault<string>(query, new { UserId = userId });
+                    var username = await connection.QueryFirstOrDefaultAsync<string>(query, new { UserId = userId });
 
                     return username;
                 }
@@ -29,7 +29,7 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         // Метод для реєстрації нового користувача з використанням Dapper
-        public int? AddUser(string username, string email, string password)
+        public async Task<int?> AddUserAsync(string username, string email, string password)
         {
             try
             {
@@ -38,12 +38,12 @@ namespace SnippetsLibraryWebApp.Repository
                 {
                     string query = "INSERT INTO [User] (Username, Email, Password) VALUES (@Username, @Email, @PasswordHash)";
                     var parameters = new { Username = username, Email = email, PasswordHash = HashHelper.HashPassword(password) };
-                    int rowsAffected = connection.Execute(query, parameters);
+                    int rowsAffected = await connection.ExecuteAsync(query, parameters);
 
                     if (rowsAffected > 0)
                     {
                         query = "SELECT ID FROM [User] WHERE Email = @Email";
-                        int? userID = connection.QueryFirstOrDefault<UserModel>(query, new { Email = email }).Id;
+                        int? userID = connection.QueryFirstOrDefaultAsync<UserModel>(query, new { Email = email }).Id;
 
                         if (userID != null)
                         {
@@ -61,7 +61,7 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         // метод для авторизації (з Dapper)
-        public int? GetUserId(string email, string password)
+        public async Task<int?> GetUserIdAsync(string email, string password)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace SnippetsLibraryWebApp.Repository
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string query = "SELECT ID, Username, Password AS PasswordHash FROM [User] WHERE Email = @Email";
-                    var user = connection.QueryFirstOrDefault<UserModel>(query, new { Email = email });
+                    var user = await connection.QueryFirstOrDefaultAsync<UserModel>(query, new { Email = email });
 
                     if (user != null && user.PasswordHash == HashHelper.HashPassword(password))
                     {
@@ -88,7 +88,7 @@ namespace SnippetsLibraryWebApp.Repository
 
         // TODO: GetUserById(int userId) якщо буде вікно профіля користувача
 
-        // TODO: EditUser(int userId) якщо буде профілm користувача має редагуватися
+        // TODO: EditUser(int userId) якщо буде профіль користувача який має редагуватися
 
     }
 }
