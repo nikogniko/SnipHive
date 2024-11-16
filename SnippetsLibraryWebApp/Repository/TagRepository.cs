@@ -54,6 +54,24 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        public async Task<TagModel> GetTagsByIdAsync(int tagId)
+        {
+            try
+            {
+                string connectionString = ConfigurationHelper.GetConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT ID, Name FROM Tag WHERE ID = @TagID";
+                    return await connection.QueryFirstOrDefaultAsync<TagModel>(query, new { TagID = tagId });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while getting tag by id: " + ex.Message);
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<TagModel>> GetTagsBySnippetIdAsync(int snippetId)
         {
             try

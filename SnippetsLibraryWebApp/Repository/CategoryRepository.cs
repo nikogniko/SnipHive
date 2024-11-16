@@ -26,6 +26,24 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        public async Task<CategoryModel> GetCategoryByIdAsync(int categoryId)
+        {
+            try
+            {
+                string connectionString = ConfigurationHelper.GetConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT ID, Name FROM Category WHERE ID = @CategoryID";
+                    return await connection.QueryFirstOrDefaultAsync<CategoryModel>(query, new { CategoryID = categoryId });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while getting category by id: " + ex.Message);
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<CategoryModel>> GetCategoriesBySnippetIdAsync(int snippetId)
         {
             try

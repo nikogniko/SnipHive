@@ -11,10 +11,14 @@ namespace SnippetsLibraryWebApp.Controllers
         public class AddSnippetController : Controller
         {
             private readonly SnippetRepository _snippetRepository;
+            private readonly TagRepository _tagRepository;
+            private readonly CategoryRepository _categoryRepository;
 
-            public AddSnippetController(SnippetRepository snippetRepository)
+            public AddSnippetController(SnippetRepository snippetRepository, TagRepository tagRepository, CategoryRepository categoryRepository)
             {
                 _snippetRepository = snippetRepository;
+                _tagRepository = tagRepository;
+                _categoryRepository=categoryRepository;
             }
 
             // Дія для відкриття сторінки додавання сніпета
@@ -31,22 +35,57 @@ namespace SnippetsLibraryWebApp.Controllers
             }
 
             [HttpPost]
-            //[Route("api/snippets/add")]
-            public async Task<IActionResult> AddSnippetAsync( string title, string description, int languageID, string code, 
-                string status,  List<CategoryModel> categories, List<TagModel> tags, int userID)
+            [Route("api/tags/add")]
+            public async Task<IActionResult> AddTag([FromBody] string tagName)
             {
-                // Перевіряємо, чи запит містить необхідні дані
-/*                if (request == null || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Code))
+                if (string.IsNullOrWhiteSpace(tagName))
                 {
-                    return BadRequest("Invalid request data.");
-                }*/
-
-                //  ------метод валідації даних в жсі зробити--------
+                    return BadRequest("Invalid tag name.");
+                }
 
                 try
                 {
-                    // Отримуємо ідентифікатор користувача (наприклад, з токена аутентифікації)
-                    //int userId = GetUserIdFromToken(); // Реалізуйте метод для отримання ідентифікатора користувача
+                    // Викликаємо метод репозиторія для додавання нового тега
+                    var tagId = await _tagRepository.AddNewTagAsync(tagName);
+
+                    // Якщо не вдалося додати тег
+                    if (tagId == null)
+                    {
+                        return StatusCode(500, "Failed to add the tag.");
+                    }
+
+                    // Повертаємо ID нового тега
+                    return Ok(tagId);
+                }
+                catch (Exception ex)
+                {
+                    // Логування помилки
+                    Console.WriteLine($"Error while adding tag: {ex.Message}");
+                    return StatusCode(500, "An error occurred while adding the tag.");
+                }
+            }
+
+
+
+            [HttpPost]
+            [Route("api/snippets/add")]
+            public async Task<IActionResult> AddSnippetAsync( string title, string description, int languageID, string code, 
+                string status,  int[] categories, int[] tags, int userID)
+            {
+                try
+                {
+                    List<CategoryModel> categoriesModel = new List<CategoryModel>();
+
+                    foreach(var category in categories)
+                    {
+                        categoriesModel.Add(await _categoryRepository.GetCategoryByIdAsync(category));
+                    }
+
+                    List<TagModel> tagsModel = new List<TagModel>();
+                    foreach (var tag in tags)
+                    {
+                        tagsModel.Add(await _tagRepository.GetTagsByIdAsync(tag));
+                    }
 
                     // Створюємо новий об'єкт SnippetModel з вхідними даними
                     var newSnippet = new SnippetModel
@@ -57,8 +96,8 @@ namespace SnippetsLibraryWebApp.Controllers
                         Code = code,
                         Status = status,
                         AuthorID = userID,
-                        Categories = categories,
-                        Tags = tags
+                        Categories = categoriesModel,
+                        Tags = tagsModel
                     };
 
                     // Додаємо сніпет до бази даних
@@ -75,6 +114,7 @@ namespace SnippetsLibraryWebApp.Controllers
                 }
             }
 
+            
 
             // Дія для обробки додавання нового сніпета
             /*[HttpPost]
