@@ -210,4 +210,20 @@ $(document).ready(function () {
             e.preventDefault(); // Запобігаємо відправці форми
         }
     });
+
+    function autoResize(element) {
+        element.style.height = 'auto'; // Спочатку встановлюємо висоту на автоматичну
+        element.style.height = (element.scrollHeight) + 'px'; // Змінюємо висоту на основі scrollHeight
+    }
+
+    const description = document.getElementById('Description');
+    const title = document.getElementById('Title');
+
+    description.addEventListener('input', function () {
+        autoResize(this);
+    });
+
+    title.addEventListener('input', function () {
+        autoResize(this);
+    });
 });

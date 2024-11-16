@@ -15,13 +15,12 @@
             <form asp-action="AddSnippet" method="post">
                 <div class="form-group">
                     <label for="Title">Назва <span class="required">*</span></label>
-                    <textarea type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required></textarea>
+                    <input type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required />
                 </div>
 
                 <div class="form-group">
                     <label for="ProgrammingLanguageID">Мова програмування <span class="required">*</span></label>
-                    <!-- form-control  -->
-                    <select class="select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID"  required>
+                    <select class="form-control select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID"  required>
                         <option value="" selected>-- Оберіть мову --</option>
                         @foreach (var language in await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync())
                         {
@@ -48,9 +47,15 @@
                 <div class="form-group category-select-container">
                     <label for="Categories">Категорії</label>
                     <div id="categoryDropdown" class="custom-dropdown">
+<<<<<<< HEAD
                         <span class="dropdown-placeholder">-- Оберіть до 3-х категорій --</span>
-                        <div id="dropdownCategoryList" class="dropdown-content">
+                        <div id="dropdownList" class="dropdown-content">
                             @foreach (var category in await _categoryRepository.GetAllCategoriesAsync())
+=======
+                        <span class="dropdown-placeholder">--Оберіть до 3-х категорій--</span>
+                        <div id="dropdownCategoryList" class="dropdown-content">
+                            @foreach (var category in _categoryRepository.GetAllCategories())
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
                             {
                                 <label class="checkbox-label">
                                     <input type="checkbox" class="category-checkbox" value="@category.ID" />
@@ -62,12 +67,22 @@
                     <div id="selectedCategories" class="selected-list"></div>
                 </div>
 
+<<<<<<< HEAD
+                <div class="form-group">
+                    <label>Теги</label>
+                    <select class="select-search" id="Tags" name="Tags" multiple>
+                        @foreach (var tag in await _tagRepository.GetAllTagsAsync())
+                        {
+                            <option value="@tag.ID">@tag.Name</option>
+                        }
+                    </select>
+=======
                 <div class="form-group tag-select-container">
                     <label for="Tags">Теги</label>
                     <div id="tagDropdown" class="custom-dropdown">
                         <span class="dropdown-placeholder">--Оберіть теги--</span>
                         <div id="dropdownTagList" class="dropdown-content">
-                        @foreach (var tag in await _tagRepository.GetAllTagsAsync())
+                            @foreach (var tag in _tagRepository.GetAllTags())
                             {
                                 <label class="checkbox-label">
                                     <input type="checkbox" class="tag-checkbox" value="@tag.ID" />
@@ -76,19 +91,8 @@
                             }
                         </div>
                     </div>
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
                     <div id="selectedTags" class="selected-list"></div>
-                </div>
-
-                <div class="form-group">
-                    <div class="add-tag-container">
-                        <input type="text" class="form-control" id="addTag" name="addTag" placeholder="Додайте власний тег за потреби..." />
-                        <button type="button" id="addTagBtn" class="btn secondary-btn">Додати</button>
-                    </div>
-                </div>            
-
-                <div class="form-group form-buttons">
-                    <button type="submit" class="btn primary-btn">Зберегти</button>
-                    <a href="/" class="btn secondary-btn">Відмінити</a>
                 </div>
             </form>
         </div>
@@ -104,3 +108,8 @@
         </div>
     </div>
 </div>
+
+<!-- Include addSnippet.js -->
+@section Scripts {
+
+}
