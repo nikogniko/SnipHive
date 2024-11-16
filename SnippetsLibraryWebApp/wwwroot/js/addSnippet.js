@@ -12,37 +12,37 @@ $(document).ready(function () {
         cpp: "text/x-c++src", // Режим для C++
         css: "css",
         dart: "dart",
-        elixir: "plaintext", 
-        erlang: "plaintext", 
-        fsharp: "plaintext", 
+        elixir: "plaintext",
+        erlang: "plaintext",
+        fsharp: "plaintext",
         go: "go",
-        groovy: "plaintext", 
-        haskell: "plaintext", 
+        groovy: "plaintext",
+        haskell: "plaintext",
         html: "htmlmixed",
         java: "text/x-java", // Режим для Java
         javascript: "javascript",
         json: "application/json",
-        julia: "plaintext", 
-        kotlin: "plaintext", 
+        julia: "plaintext",
+        kotlin: "plaintext",
         lua: "lua",
-        matlab: "plaintext", 
+        matlab: "plaintext",
         objectivec: "text/x-objectivec", // Режим для Objective-C
         other: "plaintext",
         perl: "perl",
         php: "php",
         plsql: "sql",
-        powershell: "plaintext", 
+        powershell: "plaintext",
         python: "python",
-        r: "plaintext", 
+        r: "plaintext",
         ruby: "ruby",
         rust: "rust",
-        scala: "plaintext", 
+        scala: "plaintext",
         shell: "shell",
         sql: "sql",
         swift: "swift",
         tsql: "sql",
         typescript: "javascript",
-        vbnet: "plaintext", 
+        vbnet: "plaintext",
         xml: "xml",
         yaml: "yaml",
     };
@@ -53,7 +53,7 @@ $(document).ready(function () {
     initializeDropdown('#tagDropdown', '.tag-checkbox', '#selectedTags', maxTags, 'tag', false);
 
     var editor = CodeMirror.fromTextArea(document.getElementById('Code'), {
-        mode: "plaintext", 
+        mode: "plaintext",
         theme: "monokai",
         lineNumbers: true,
         matchBrackets: true,
@@ -76,7 +76,7 @@ $(document).ready(function () {
                                         language == "Shell script" ? "shell" : language
 
         var mode = languageModes[language.toLowerCase()] || "plaintext"
-        
+
         editor.setOption("mode", mode);
     })
 
@@ -112,7 +112,6 @@ $(document).ready(function () {
         $(checkboxSelector).on('change', function () {
             updateSelectedItems();
         });
-
         // Функція для оновлення відображення вибраних елементів
         function updateSelectedItems() {
             const selected = [];
@@ -209,5 +208,20 @@ $(document).ready(function () {
             alert("Ви можете обрати максимум 5 тегів.");
             e.preventDefault(); // Запобігаємо відправці форми
         }
+    });
+    function autoResize(element) {
+        element.style.height = 'auto'; // Спочатку встановлюємо висоту на автоматичну
+        element.style.height = (element.scrollHeight) + 'px'; // Змінюємо висоту на основі scrollHeight
+    }
+
+    const description = document.getElementById('Description');
+    const title = document.getElementById('Title');
+
+    description.addEventListener('input', function () {
+        autoResize(this);
+    });
+
+    title.addEventListener('input', function () {
+        autoResize(this);
     });
 });

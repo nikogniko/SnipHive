@@ -58,12 +58,14 @@
 
 /* Optional: Hover effect for selected-category */
 .selected-category:hover {
-    background-color: #0056b3;
+    background-color: var(--dark-accent-color);
+    color: #fff;
 }
 
 /* Optional: Hover effect for selected-tag */
 .selected-tag:hover {
-    background-color: #0056b3;
+    background-color: var(--dark-accent-color);
+    color: #fff;
 }
 
 
@@ -416,12 +418,20 @@ body .container {
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
+    color: #fff;
+    background-color: var(--dark-accent-color);
+    padding: 5px;
+    border-radius: 10px;
 }
 
 .form-sections-container {
     display: flex;
     gap: 20px;
 }
+
+    .form-sections-container label {
+        font-weight: 600;
+    }
 
 .form-details-section,
 .form-code-section {
@@ -430,6 +440,14 @@ body .container {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     flex: 1;
+}
+
+.form-details-section {
+    flex: 3;
+}
+
+.form-code-section {
+    flex: 4;
 }
 
 .form-group {
@@ -447,33 +465,50 @@ body .container {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    /*font-size: 16px;*/
+    box-sizing: border-box;
+    overflow-y: hidden;
+    resize: none;
 }
+
 /* Стилі для випадаючого списку з пошуком */
 .select-search {
     width: 100%;
     padding: 10px;
+    cursor: pointer;
     /*border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;*/
 }
 
 /* Стилі для перемикачів статусу */
+
 .status-toggle-group {
     display: flex;
     gap: 10px;
 }
 
-.toggle-label {
-    display: inline-block;
-    padding: 5px 15px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    cursor: pointer;
+    .status-toggle-group input[type="radio"] {
+        display: none;
+    }
+
+.status-toggle-group {
+    display: flex;
+    gap: 10px;
 }
 
+    .status-toggle-group .toggle-label {
+        display: inline-block;
+        padding: 5px 15px;
+        margin: 0;
+        margin-right: 10px;
+        border: 1px solid var(--secondary-background-color);
+        border-radius: 20px;
+        cursor: pointer;
+    }
+
 input[type="radio"]:checked + .toggle-label {
-    background-color: #007bff;
+    background-color: var(--dark-accent-color);
+    border-color: var(--dark-accent-color);
     color: #fff;
 }
 
@@ -491,7 +526,6 @@ input[type="radio"]:checked + .toggle-label {
 }
 
 .code-editor-container {
-    width: 500px;
     height: 600px;
     min-height: 600px;
 }
@@ -577,8 +611,14 @@ input[type="radio"]:checked + .toggle-label {
         cursor: pointer;
     }
 
-/* Стилі для блоку коду */
+.add-tag-container {
+    display: flex;
+    gap: 5px;
+}
 
+
+
+/* Стилі для блоку коду */
 .code-editor-container {
     background-color: #2d2d2d;
     color: #f8f8f2;

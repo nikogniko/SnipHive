@@ -25,6 +25,34 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        public async Task<int?> AddNewTagAsync(string tagName)
+        {
+            try
+            {
+                string connectionString = ConfigurationHelper.GetConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    // Перевірка, чи існує тег
+                    string checkTagSql = "SELECT ID FROM Tag WHERE Name = @Name";
+                    int? tagId = await connection.QueryFirstOrDefaultAsync<int?>(checkTagSql, new { Name = tagName });
+
+                    // Якщо тег не існує, додаємо його
+                    if (tagId == null)
+                    {
+                        string insertTagSql = "INSERT INTO Tag (Name) VALUES (@Name); SELECT CAST(SCOPE_IDENTITY() as int)";
+                        tagId = await connection.QuerySingleAsync<int>(insertTagSql, new { Name = tagName });
+                    }
+
+                    return tagId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while getting all tags: " + ex.Message);
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<TagModel>> GetTagsBySnippetIdAsync(int snippetId)
         {
             try

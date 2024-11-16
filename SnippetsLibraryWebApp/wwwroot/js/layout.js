@@ -1,6 +1,7 @@
 // wwwroot/js/layout.js
 
 $(document).ready(function () {
+
     // Initialize user state based on localStorage
     var isAuthenticated = localStorage.getItem("activeUserId") ? true : false;
     var activeUserName = localStorage.getItem("activeUserName") || '';
