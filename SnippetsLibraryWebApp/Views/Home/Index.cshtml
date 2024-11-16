@@ -9,9 +9,9 @@
 
 
 <!-- Модальне вікно Реєстрації -->
-<div id="registerModal" class="modal" ng-controller="processAuthorization">
+<div id="registerModal" class="modal" style="display: none;">
     <div class="modal-content">
-        <span id="closeModal" class="close" ng-click="closeRegisterModal()">&times;</span>
+        <span class="close close-register-modal">&times;</span>
         <h2 class="modal-title">Реєстрація</h2>
         <form id="registerForm">
             <div class="form-group">
@@ -27,8 +27,7 @@
             <div class="form-group password-group">
                 <label for="registerPassword">Пароль</label>
                 <div class="password-wrapper">
-                    <input type="password" id="registerPassword" name="registerPassword" class="form-input" minlength="8" maxlength="25" required />
-                    <span id="togglePassword" class="toggle-password">👁️</span>
+                    <input type="password" id="registerPassword" name="registerPassword" class="form-input" required minlength="8" maxlength="25" />
                 </div>
                 <small class="error-message" id="registerPasswordError"></small>
             </div>
@@ -43,7 +42,7 @@
 
 
 <!-- Модальне вікно для входу -->
-<div id="loginModal" class="modal">
+<div id="loginModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span id="closeLoginModal" class="close">&times;</span>
         <h2 class="modal-title">Вхід в систему</h2>

@@ -349,19 +349,11 @@ body .container{
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
-    color: #fff;
-    background-color: var(--dark-accent-color);
-    padding: 5px;
-    border-radius: 10px;
 }
 
 .form-sections-container {
     display: flex;
     gap: 20px;
-}
-
-.form-sections-container label{
-    font-weight: 400;
 }
 
 .form-details-section,
@@ -372,12 +364,7 @@ body .container{
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     flex: 1;
 }
-.form-details-section{
-    flex:3;
-}
-.form-code-section {
-    flex: 4;
-}
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -427,9 +414,7 @@ body .container{
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    box-sizing: border-box;
-    overflow: hidden;
-    resize: none;
+    /*font-size: 16px;*/
 }
 
 /* Поле для тексту з описом */
@@ -442,7 +427,9 @@ body .container{
 .select-search {
     width: 100%;
     padding: 10px;
-    cursor: pointer;
+    /*border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;*/
 }
 
 /* Стилі для радіо кнопок */
@@ -462,24 +449,16 @@ body .container{
     gap: 10px;
 }
 
-    /* Приховати радіо-кнопки */ 
-    .status-toggle-group input[type="radio"] {
-        display: none; 
-        /* Альтернативний спосіб: opacity: 0; */
-    }
-
 .toggle-label {
     display: inline-block;
     padding: 5px 15px;
-    margin-right: 10px;
-    border: 1px solid var(--secondary-background-color);
+    border: 1px solid #ccc;
     border-radius: 20px;
     cursor: pointer;
 }
 
 input[type="radio"]:checked + .toggle-label {
-    background-color: var(--dark-accent-color);
-    border-color: var(--dark-accent-color);
+    background-color: #007bff;
     color: #fff;
 }
 
@@ -602,7 +581,7 @@ input[type="radio"]:checked + .toggle-label {
     position: absolute;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-height: 240px;
+    max-height: 200px;
     overflow-y: auto;
     z-index: 1;
     width: 100%;
