@@ -47,14 +47,18 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "snippetDetails", 
-    pattern: "{controlle=SnippetDetails}/{action=SnippetDetails}/{id?}");
+    pattern: "{controller=SnippetDetails}/{action=SnippetDetails}/{id?}");
 
 app.MapControllerRoute(
     name: "personalSnippets",
-    pattern: "{controlle=PersonalSnippets}/{action=PersonalSnippets}/{id?}");
+    pattern: "{controller=PersonalSnippets}/{action=PersonalSnippets}/{id?}");
 
 app.MapControllerRoute(
     name: "savedSnippets",
-    pattern: "{controlle=SavedSnippets}/{action=SavedSnippets}/{id?}");
+    pattern: "{controller=SavedSnippets}/{action=SavedSnippets}/{id?}");
+
+app.MapControllerRoute(
+    name: "tags",
+    pattern: "{controller=Tags}/{action=AddTag}/{id?}");
 
 app.Run();

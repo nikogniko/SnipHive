@@ -48,9 +48,9 @@ $(document).ready(function () {
     };
 
 
-    // Ініціалізація випадайок
+    // Ініціалізація випадайок з hasRemoveButton=true для обох
     initializeDropdown('#categoryDropdown', '.category-checkbox', '#selectedCategories', maxCategories, 'category', true);
-    initializeDropdown('#tagDropdown', '.tag-checkbox', '#selectedTags', maxTags, 'tag', false);
+    initializeDropdown('#tagDropdown', '.tag-checkbox', '#selectedTags', maxTags, 'tag', true); // Встановлено на true для тегів
 
     var editor = CodeMirror.fromTextArea(document.getElementById('Code'), {
         mode: "plaintext",
@@ -193,10 +193,38 @@ $(document).ready(function () {
                 }
             });
         }
+
+        // Делегування події кліку для видалення тегів
+        if (hasRemoveButton && type === 'tag') {
+            selectedList.on('click', `.remove-${type}`, function () {
+                const itemTag = $(this).parent(`.selected-${type}`);
+                const itemId = itemTag.data('id');
+
+                // Відмічаємо відповідний чекбокс
+                $(`${checkboxSelector}[value="${itemId}"]`).prop('checked', false);
+
+                // Додаємо клас для анімації
+                itemTag.addClass('removing');
+
+                // Видаляємо тег після завершення анімації
+                setTimeout(function () {
+                    itemTag.remove();
+                }, 300); // Час має відповідати тривалості анімації CSS
+            });
+
+            // Обробка клавіатурних подій для видалення тегів
+            selectedList.on('keydown', '.remove-tag', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    $(this).click();
+                }
+            });
+        }
     }
 
     // Опціонально: Обробка відправки форми для перевірки лімітів
     $('form').on('submit', function (e) {
+        e.preventDefault();
         var selectedCount = $('.category-checkbox:checked').length;
         var selectedTagsCount = $('.tag-checkbox:checked').length;
 
@@ -209,6 +237,8 @@ $(document).ready(function () {
             alert("Ви можете обрати максимум 5 тегів.");
             e.preventDefault(); // Запобігаємо відправці форми
         }
+
+        gatherAndSubmitFormData(); // Виклик функції для збирання та відправлення даних
     });
     function autoResize(element) {
         element.style.height = 'auto'; // Спочатку встановлюємо висоту на автоматичну
@@ -226,8 +256,6 @@ $(document).ready(function () {
         autoResize(this);
     });
 
-
-
     document.getElementById('addTagBtn').addEventListener('click', async function () {
         // Отримуємо значення тега
         const tagInput = document.getElementById('addTag').value.trim();
@@ -240,23 +268,24 @@ $(document).ready(function () {
 
         try {
             // Відправляємо POST-запит на сервер для додавання тега
-            const response = await fetch('/api/tags/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            $.ajax({
+                url: '/Tags/AddTag',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    tagName: tagInput
                 },
-                body: JSON.stringify(tagInput)
-            });
+                success: function (response) {
+                    if (response.success) {
+                        alert('Тег додано успішно!');
 
-            // Обробка відповіді від сервера
-            if (response.ok) {
-                alert('Тег додано успішно!');
-
-                // Викликаємо функцію для оновлення випадаючого списку тегів
-                loadTags();
-            } else {
-                alert('Не вдалося додати тег. Спробуйте ще раз.');
-            }
+                        // Викликаємо функцію для оновлення випадаючого списку тегів
+                        loadTags();
+                    } else {
+                        alert('Не вдалося додати тег. Спробуйте ще раз.');
+                    }
+                }
+            })
         } catch (error) {
             console.error('Error adding tag:', error);
             alert('Сталася помилка при додаванні тега.');
@@ -265,7 +294,7 @@ $(document).ready(function () {
 
     function loadTags() {
         $.ajax({
-            url: 'api/tags/add',
+            url: '/Tags/GetAllTags',
             type: 'GET',
             dataType: 'json',
             success: function (tags) {
@@ -273,11 +302,11 @@ $(document).ready(function () {
 
                 $('#dropdownTagList').empty();
                 tags.forEach(function (tag) {
-                    const isChecked = previouslySelected.includes(tag.ID.toString()) ? 'checked' : '';
+                    const isChecked = previouslySelected.includes(tag.id.toString()) ? 'checked' : '';
                     const checkboxLabel = `
                     <label class="checkbox-label">
-                        <input type="checkbox" class="tag-checkbox" value="${tag.ID}" ${isChecked} />
-                        ${tag.Name}
+                        <input type="checkbox" class="tag-checkbox" value="${tag.id}" ${isChecked} />
+                        ${tag.name}
                     </label>
                 `;
                     $('#dropdownTagList').append(checkboxLabel);
@@ -298,8 +327,7 @@ $(document).ready(function () {
         return selected;
     }
 
-
-    async function gatherAndSubmitFormData() {
+    function gatherAndSubmitFormData() {
         // Збирання даних із форми
         const title = document.getElementById('Title').value.trim();
         const programmingLanguageID = document.getElementById('ProgrammingLanguageID').value;
@@ -342,35 +370,40 @@ $(document).ready(function () {
             status: status,
             categories: selectedCategories,
             tags: selectedTags,
-            userID: 1 // Замініть на актуальний ідентифікатор користувача, якщо він доступний
+            userID: localStorage.getItem("activeUserId")
         };
 
         // Відправлення даних через POST-запит
         try {
-            const response = await fetch('/api/snippets/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            $.ajax({
+                url: "/AddSnippet/AddSnippet",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    title: formData.title,
+                    description: formData.description,
+                    languageID: formData.languageID,
+                    code: formData.code,
+                    status: formData.status,
+                    categories: formData.categories,
+                    tags: formData.tags,
+                    userID: formData.userID
                 },
-                body: JSON.stringify(formData)
-            });
+                success: function (response) {
 
-            if (response.ok) {
-                const responseData = await response.json();
-                alert(`Сніпет успішно додано! ID: ${responseData.SnippetID}`);
-                // Можливо, можна зробити додаткові дії, наприклад, перенаправлення або очищення форми
-            } else {
-                alert('Не вдалося додати сніпет. Перевірте дані та спробуйте ще раз.');
-            }
+                    if (response.snippetID == null) {
+                        alert('При створенні сніпета виникла помилка!')
+                        return
+                    }
+
+                    const snippetId = response.snippetID;
+                    alert(`Сніпет успішно додано! ID: ${snippetId}`);
+                    // Можливо, можна зробити додаткові дії, наприклад, перенаправлення або очищення форми
+                }
+            })
         } catch (error) {
             console.error('Помилка при відправці даних:', error);
             alert('Сталася помилка при відправленні запиту.');
         }
     }
-
-    // Додаємо обробник події для кнопки або форми
-    document.querySelector('form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Запобігаємо стандартному відправленню форми
-        gatherAndSubmitFormData(); // Виклик функції для збирання та відправлення даних
-    });
 });

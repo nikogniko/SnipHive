@@ -233,7 +233,7 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
-        public async Task<bool> AddSnippetAsync(SnippetModel snippet)
+        public async Task<int?> AddSnippetAsync(SnippetModel snippet)
         {
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
@@ -274,14 +274,14 @@ namespace SnippetsLibraryWebApp.Repository
 
                         // Фіксація транзакції
                         transaction.Commit();
-                        return true;
+                        return snippetId;
                     }
                     catch (Exception ex)
                     {
                         // Відкат транзакції у разі помилки
                         transaction.Rollback();
                         Console.WriteLine("Error while adding snippet: " + ex.Message);
-                        return false;
+                        return null;
                     }
                 }
             }

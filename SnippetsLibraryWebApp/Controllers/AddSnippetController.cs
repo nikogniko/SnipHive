@@ -68,8 +68,7 @@ namespace SnippetsLibraryWebApp.Controllers
 
 
             [HttpPost]
-            [Route("api/snippets/add")]
-            public async Task<IActionResult> AddSnippetAsync( string title, string description, int languageID, string code, 
+            public async Task<IActionResult> AddSnippetAsync(string title, string description, int languageID, string code, 
                 string status,  int[] categories, int[] tags, int userID)
             {
                 try
@@ -113,30 +112,6 @@ namespace SnippetsLibraryWebApp.Controllers
                     return StatusCode(500, "An error occurred while adding the snippet.");
                 }
             }
-
-            
-
-            // Дія для обробки додавання нового сніпета
-            /*[HttpPost]
-            public IActionResult AddSnippet(SnippetModel model)
-            {
-                if (ModelState.IsValid)
-                {
-                    // Логіка додавання сніпета в базу даних
-                    // Після успішного додавання - перенаправлення на головну сторінку
-                    return RedirectToAction("Index", "Home");
-                }
-
-                // Якщо модель невалідна - повернення до форми з валідаційними повідомленнями
-                *//*model.Languages = GetProgrammingLanguages();
-                model.Categories = GetAvailableCategories();
-                model.Tags = GetAvailableTags();*//*
-                return View(model);
-            }*/
-
-
-
-
         }
     }
 
