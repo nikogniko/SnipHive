@@ -25,6 +25,28 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        public CategoryModel GetCategoryById(int categoryId)
+        {
+            try
+            {
+                string connectionString = ConfigurationHelper.GetConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT *
+                        FROM Category c
+                        WHERE sc.ID = @cId";
+
+                    return connection.Query<CategoryModel>(query, new { cId = categoryId }).FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while getting categories: " + ex.Message);
+                return null;
+            }
+        }
+
         public IEnumerable<CategoryModel> GetCategoriesBySnippetId(int snippetId)
         {
             try

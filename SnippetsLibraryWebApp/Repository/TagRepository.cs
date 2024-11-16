@@ -15,7 +15,8 @@ namespace SnippetsLibraryWebApp.Repository
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string query = "SELECT ID, Name FROM Tag";
-                    return connection.Query<TagModel>(query);
+                    var result = connection.Query<TagModel>(query);
+                    return result;
                 }
             }
             catch (Exception ex)
