@@ -6,68 +6,6 @@
     --secondary-accent-color: #F3C301; /* Жовтий */
 }
 
-/* Selected Category Tags */
-.selected-category {
-    display: inline-block;
-    background-color: #007bff;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 15px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    position: relative;
-    cursor: default;
-}
-
-/* Selected Tag Tags */
-.selected-tag {
-    display: inline-block;
-    background-color: #007bff;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 15px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    position: relative;
-    cursor: default;
-}
-
-/* Remove Button (x) */
-.remove-category {
-    margin-left: 8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-    .remove-category:hover {
-        color: #ffdddd;
-    }
-
-/* Remove Button (x) */
-.remove-tag {
-    margin-left: 8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-    .remove-tag:hover {
-        color: #ffdddd;
-    }
-
-/* Optional: Hover effect for selected-category */
-.selected-category:hover {
-    background-color: var(--dark-accent-color);
-    color: #fff;
-}
-
-/* Optional: Hover effect for selected-tag */
-.selected-tag:hover {
-    background-color: var(--dark-accent-color);
-    color: #fff;
-}
-
 
 
 html {
@@ -574,25 +512,9 @@ input[type="radio"]:checked + .toggle-label {
     margin-top: 10px;
 }
 
-.selected-category {
-    display: inline-block;
-    padding: 5px 10px;
-    margin-right: 5px;
-    margin-top: 5px;
-    background-color: #e0f2e9;
-    color: #005500;
-    border: 1px solid #005500;
-    border-radius: 20px;
-    cursor: pointer;
-}
+/* Selected Category & Tags */
 
-    .selected-category .remove-icon {
-        margin-left: 5px;
-        color: #666;
-        cursor: pointer;
-    }
-
-
+.selected-category,
 .selected-tag {
     display: inline-block;
     padding: 5px 10px;
@@ -603,20 +525,43 @@ input[type="radio"]:checked + .toggle-label {
     border: 1px solid #005500;
     border-radius: 20px;
     cursor: pointer;
+    position: relative;
+    font-size: 0.9em;
+    margin-bottom: 5px;
 }
 
-    .selected-tag .remove-icon {
-        margin-left: 5px;
-        color: #666;
-        cursor: pointer;
+
+/* Remove Button (x) */
+.remove-category,
+.remove-tag {
+    margin-left: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    .remove-category:hover,
+    .remove-tag:hover {
+        color: #ffdddd;
     }
+
+/* Optional: Hover effect for selected-category & selected-tag */
+.selected-category:hover,
+.selected-tag:hover {
+    background-color: var(--dark-accent-color);
+    color: #fff;
+}
+
+.selected-category .remove-icon,
+.selected-tag .remove-icon {
+    margin-left: 5px;
+    color: #666;
+    cursor: pointer;
+}
 
 .add-tag-container {
     display: flex;
     gap: 5px;
 }
-
-
 
 /* Стилі для блоку коду */
 .code-editor-container {
