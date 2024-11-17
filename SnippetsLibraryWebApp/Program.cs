@@ -5,6 +5,7 @@ using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Repository;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Authentication;
+using SnippetsLibraryWebApp.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,33 @@ builder.Services.AddAuthentication("CookieAuth")
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Error";
+
+        // Налаштування подій для зміни поведінки при неавтентифікованому доступі
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api") || context.Request.IsAjaxRequest())
+            {
+                context.Response.StatusCode = 401;
+            }
+            else
+            {
+                context.Response.Redirect("/"); // Перенаправлення на головну сторінку
+            }
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api") || context.Request.IsAjaxRequest())
+            {
+                context.Response.StatusCode = 403;
+            }
+            else
+            {
+                context.Response.Redirect("/"); // Перенаправлення на головну сторінку
+            }
+            return Task.CompletedTask;
+        };
     });
 
 var app = builder.Build();

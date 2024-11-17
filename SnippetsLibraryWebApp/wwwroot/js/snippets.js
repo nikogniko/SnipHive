@@ -27,8 +27,8 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 401) { // Unauthorized
-                    // Перенаправити на головну сторінку або показати всі сніпети
-                    loadSnippets('/Snippets/AllSnippets');
+                    // Перенаправити на головну сторінку або показати повідомлення
+                    window.location.href = '/Snippets/AllSnippets'; // Перенаправлення на головну
                 } else {
                     alert("Помилка при завантаженні сніпетів.");
                 }

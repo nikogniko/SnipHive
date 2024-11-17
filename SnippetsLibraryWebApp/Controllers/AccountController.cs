@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace SnippetsLibraryWebApp.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly UserRepository _userRepository;
@@ -114,6 +115,7 @@ namespace SnippetsLibraryWebApp.Controllers
                     var authProperties = new AuthenticationProperties
                     {
                         // Налаштування автентифікації, якщо потрібно
+                        IsPersistent = model.RememberMe
                     };
 
                     await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
@@ -141,6 +143,7 @@ namespace SnippetsLibraryWebApp.Controllers
 
             return View(model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

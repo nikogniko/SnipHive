@@ -40,7 +40,7 @@
                 var snippetCard = $(this).closest('.snippet-card');
                 var snippetId = snippetCard.closest('[data-id]').data('id');
                 // Перенаправлення на сторінку деталей сніпета
-                window.location.href = '@Url.Action("Details", "Snippets")/' + snippetId;
+                window.location.href = '/Snippets/Details/' + snippetId;
             });
         });
     </script>

@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace SnippetsLibraryWebApp.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "CookieAuth")]
     public class SnippetsController : Controller
     {
         private readonly SnippetRepository _snippetsRepository;
@@ -25,7 +25,6 @@ namespace SnippetsLibraryWebApp.Controllers
 
         // Дія для відкриття сторінки додавання сніпета
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult AddSnippet()
         {
             return View("~/Views/AddSnippet/AddSnippet.cshtml");

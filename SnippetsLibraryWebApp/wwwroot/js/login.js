@@ -1,4 +1,4 @@
-﻿// login.js
+﻿// wwwroot/js/login.js
 
 $(document).ready(function () {
 
@@ -13,6 +13,7 @@ $(document).ready(function () {
         var loginInput = $('#loginPassword');
         var type = loginInput.attr('type') === 'password' ? 'text' : 'password';
         loginInput.attr('type', type);
+        $(this).text(type === 'password' ? 'Show' : 'Hide');
     });
 
     // Function to handle login form submission
