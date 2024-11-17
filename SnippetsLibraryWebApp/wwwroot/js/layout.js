@@ -3,6 +3,7 @@
 $(document).ready(function () {
 
     // Initialize user state based on localStorage
+    localStorage.clear();
     var isAuthenticated = localStorage.getItem("activeUserId") ? true : false;
     var activeUserName = localStorage.getItem("activeUserName") || '';
 
@@ -34,8 +35,16 @@ $(document).ready(function () {
     // Logout functionality
     $('#logout').on('click', function (e) {
         e.preventDefault();
-        localStorage.removeItem("activeUserId");
-        localStorage.removeItem("activeUserName");
-        updateAuthUI(false, '');
+
+        $.ajax({
+            type: "POST",
+            url: "/Account/Logout",
+            success: function () {
+                localStorage.removeItem("activeUserId");
+                localStorage.removeItem("activeUserName");
+                window.open("", '_self')
+                updateAuthUI(false, '');
+            }
+        })
     });
 });

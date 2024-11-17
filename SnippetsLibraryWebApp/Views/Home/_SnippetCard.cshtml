@@ -1,0 +1,83 @@
+﻿<!-- Views/Snippets/_SnippetCard.cshtml -->
+@model SnippetsLibraryWebApp.Models.SnippetModel
+
+<div class="snippet-card" tabindex="0">
+    <div class="snippet-header">
+        <h3 class="snippet-title">@Model.Title</h3>
+        <div class="snippet-meta">
+            <span class="snippet-language">@GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
+            <span class="snippet-saves">
+                <i class="fas fa-star"></i> @Model.SavesCount
+            </span>
+        </div>
+    </div>
+    <div class="snippet-info">
+        @if (ViewBag.PageType != "MySnippets")
+        {
+            <span class="snippet-author">Автор: @GetAuthorName(Model.AuthorID)</span>
+        }
+        else
+        {
+            <span class="snippet-status">Статус: @Model.Status.ToUpperInvariant()</span>
+        }
+    </div>
+    <div class="snippet-updated">
+        Оновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy 'о' HH:mm")
+    </div>
+    <div class="snippet-tags">
+        @foreach (var tag in Model.Tags)
+        {
+            <span class="snippet-tag">@tag.Name</span>
+        }
+    </div>
+    <div class="snippet-description">
+        <p>@TruncateDescription(Model.Description)</p>
+        <button class="details-btn">Деталі</button>
+    </div>
+    <div class="snippet-extra" style="display: none;">
+        <p>@Model.Description</p>
+        <div class="snippet-categories">
+            <strong>Категорії:</strong>
+            @foreach (var category in Model.Categories)
+            {
+                <span class="snippet-category">@category.Name</span>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    // Метод для отримання назви мови програмування за її ID
+    public string GetProgrammingLanguageName(int id)
+    {
+        // Реалізуйте логіку для отримання назви мови програмування
+        var languages = new Dictionary<int, string>
+        {
+            { 1, "C#" },
+            { 2, "C++" },
+            { 3, "Java" },
+            { 4, "Python" },
+            { 5, "JavaScript" },
+            // Додайте інші мови відповідно до вашої бази даних
+        };
+
+        return languages.ContainsKey(id) ? languages[id] : "Unknown";
+    }
+
+    // Метод для отримання імені автора за його ID
+    public string GetAuthorName(int authorId)
+    {
+        // Реалізуйте логіку для отримання імені автора
+        // Наприклад, звернутись до сервісу або бази даних
+        return $"Користувач {authorId}";
+    }
+
+    // Метод для обрізання опису до певної довжини
+    public string TruncateDescription(string description, int maxLength = 100)
+    {
+        if (string.IsNullOrEmpty(description))
+            return string.Empty;
+
+        return description.Length > maxLength ? description.Substring(0, maxLength) + "..." : description;
+    }
+}

@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Усі сніпети";
+    @model IEnumerable<SnippetsLibraryWebApp.Models.SnippetModel>
 }
 
 <!-- Registration Modal -->
@@ -44,10 +45,11 @@
     <div class="modal-content">
         <span class="close close-login-modal">&times;</span>
         <h2 class="modal-title">Вхід в систему</h2>
-        <form id="loginForm">
+        <form id="loginForm" asp-controller="Account" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
             <div class="form-group">
                 <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" name="loginEmail" class="form-input" required />
+                <input type="email" id="loginEmail" name="Email" class="form-input" required />
                 <small class="error-message" style="display: none; color: red;">
                     Введіть коректну адресу електронної пошти
                 </small>
@@ -55,7 +57,8 @@
             <div class="form-group password-group">
                 <label for="loginPassword">Пароль</label>
                 <div class="password-wrapper">
-                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required minlength="8" maxlength="25" />
+                    <input type="password" id="loginPassword" name="Password" class="form-input" required minlength="8" maxlength="25" />
+                    <button type="button" class="toggle-login-password">Show</button>
                 </div>
                 <small class="error-message" style="display: none; color: red;">
                     Пароль повинен містити 8-25 латинських літер або цифр
@@ -69,3 +72,11 @@
         </form>
     </div>
 </div>
+
+<!-- Список сніпетів -->
+<section class="snippets-list">
+    <div class="container">
+        <h1>Усі сніпети</h1>
+        @await Html.PartialAsync("_SnippetList", Model)
+    </div>
+</section>

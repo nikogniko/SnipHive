@@ -31,17 +31,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a asp-area="" asp-controller="SavedSnippets" asp-action="SavedSnippets" class="nav-link
-                            @(ViewContext.RouteData.Values["controller"].ToString() == "SavedSnippets" ? "active-link" : "text-style")">
+                        <a asp-area="" asp-controller="Snippets" asp-action="FavoriteSnippets" class="nav-link
+                            @(ViewContext.RouteData.Values["controller"].ToString() == "Snippets" && ViewContext.RouteData.Values["action"].ToString() == "FavoriteSnippets" ? "active-link" : "text-style")">
                             Обрані сніпети
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a asp-area="" asp-controller="PersonalSnippets" asp-action="PersonalSnippets" class="nav-link
-                            @(ViewContext.RouteData.Values["controller"].ToString() == "PersonalSnippets" ? "active-link" : "text-style")">
+                        <a asp-area="" asp-controller="Snippets" asp-action="MySnippets" class="nav-link
+                            @(ViewContext.RouteData.Values["controller"].ToString() == "Snippets" && ViewContext.RouteData.Values["action"].ToString() == "MySnippets" ? "active-link" : "text-style")">
                             Авторські сніпети
                         </a>
                     </li>
+
                 </ul>
 
                 <ul class="navbar-nav ml-auto align-items-center">

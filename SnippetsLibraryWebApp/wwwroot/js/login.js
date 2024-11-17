@@ -27,12 +27,16 @@ $(document).ready(function () {
             return;
         }
 
+        // Get the anti-forgery token
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
         $.ajax({
-            type: 'GET',
-            url: '/Home/LoginUser',
+            type: 'POST',
+            url: '/Account/Login',
             data: {
-                email: email,
-                password: password
+                __RequestVerificationToken: token,
+                Email: email,
+                Password: password
             },
             success: function (responseLogin) {
                 if (responseLogin.success) {
@@ -40,11 +44,12 @@ $(document).ready(function () {
                         type: 'GET',
                         url: '/Home/GetUsername',
                         data: {
-                            userId: responseLogin.userId
+                            userId: responseLogin.id
                         },
                         success: function (responseGetUsername) {
+                            //location.reload();
                             // Save user info to localStorage
-                            localStorage.setItem("activeUserId", responseLogin.userId);
+                            localStorage.setItem("activeUserId", responseLogin.id);
                             localStorage.setItem("activeUserName", responseGetUsername.username);
 
                             // Update UI

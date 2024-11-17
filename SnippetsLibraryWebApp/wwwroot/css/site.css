@@ -580,3 +580,135 @@ input[type="radio"]:checked + .toggle-label {
     resize: none;
     outline: none;
 }
+
+/*SNIPPETS STYLES*/
+/* site.css */
+
+/* Стилі для сніпетів */
+.snippet-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+}
+
+    .snippet-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+.snippet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.snippet-title {
+    font-size: 1.5em;
+    color: #2c3e50; /* Темний колір для заголовка */
+    margin: 0;
+}
+
+.snippet-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.snippet-language {
+    font-size: 1em;
+    color: #3498db; /* Синій колір для мови програмування */
+}
+
+.snippet-saves {
+    font-size: 1em;
+    color: #f1c40f; /* Жовтий колір для збережень */
+}
+
+.snippet-info {
+    font-size: 0.9em;
+    color: #7f8c8d; /* Сірий колір для інформації */
+    margin-top: 4px;
+}
+
+.snippet-updated {
+    font-size: 0.8em;
+    color: #95a5a6; /* Сірий колір для дати оновлення */
+    margin-top: 4px;
+}
+
+.snippet-tags, .snippet-categories {
+    margin-top: 8px;
+}
+
+.snippet-tag, .snippet-category {
+    display: inline-block;
+    background-color: #ecf0f1; /* Світло-сірий фон */
+    color: #2c3e50; /* Темний текст */
+    border: 1px solid #bdc3c7; /* Сірий бордер */
+    border-radius: 12px;
+    padding: 4px 8px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 0.8em;
+}
+
+.snippet-description {
+    margin-top: 12px;
+    position: relative;
+}
+
+    .snippet-description p {
+        margin: 0;
+        font-size: 1em;
+        color: #34495e; /* Темний текст */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+.details-btn {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: #2980b9; /* Синій фон */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+    .details-btn:hover {
+        background-color: #1abc9c; /* Зміна кольору при наведенні */
+    }
+
+.snippet-extra {
+    margin-top: 12px;
+    border-top: 1px solid #bdc3c7;
+    padding-top: 12px;
+}
+
+.snippets-container {
+    margin-top: 20px;
+}
+
+.no-snippets {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 1.2em;
+}
+
+/* Анімація для згортання сніпета */
+.snippet-card.removing {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}

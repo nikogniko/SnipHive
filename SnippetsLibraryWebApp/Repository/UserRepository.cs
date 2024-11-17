@@ -43,12 +43,9 @@ namespace SnippetsLibraryWebApp.Repository
                     if (rowsAffected > 0)
                     {
                         query = "SELECT ID FROM [User] WHERE Email = @Email";
-                        int? userID = connection.QueryFirstOrDefaultAsync<UserModel>(query, new { Email = email }).Id;
+                        int? userId = await connection.QueryFirstOrDefaultAsync<int?>(query, new { Email = email });
 
-                        if (userID != null)
-                        {
-                            return userID;
-                        }
+                        return userId;
                     }
                 }
             }
@@ -61,19 +58,19 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         // метод для авторизації (з Dapper)
-        public async Task<int?> GetUserIdAsync(string email, string password)
+        public async Task<UserModel> GetUserAsync(string email, string password)
         {
             try
             {
                 string connectionString = ConfigurationHelper.GetConnectionString();
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    string query = "SELECT ID, Username, Password AS PasswordHash FROM [User] WHERE Email = @Email";
+                    string query = "SELECT ID as Id, Username, Email, Password as PasswordHash FROM [User] WHERE Email = @Email";
                     var user = await connection.QueryFirstOrDefaultAsync<UserModel>(query, new { Email = email });
 
                     if (user != null && user.PasswordHash == HashHelper.HashPassword(password))
                     {
-                        return user.Id;
+                        return user;
                     }
                 }
             }

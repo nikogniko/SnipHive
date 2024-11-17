@@ -1,0 +1,9 @@
+﻿<!-- Views/Snippets/AllSnippets.cshtml -->
+@model IEnumerable<SnippetsLibraryWebApp.Models.SnippetModel>
+@{
+    ViewData["Title"] = "Усі сніпети";
+}
+
+<h1>Усі сніпети</h1>
+
+@await Html.PartialAsync("_SnippetList", Model)

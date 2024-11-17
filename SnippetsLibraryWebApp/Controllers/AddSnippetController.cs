@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Repository;
+using SnippetsLibraryWebApp.Utils;
+using System.Buffers.Text;
 using System.Diagnostics;
 
 namespace SnippetsLibraryWebApp.Controllers
@@ -73,6 +75,8 @@ namespace SnippetsLibraryWebApp.Controllers
             {
                 try
                 {
+                    var base64Code = Base64Helper.Base64Encode(code);
+
                     List<CategoryModel> categoriesModel = new List<CategoryModel>();
 
                     foreach(var category in categories)
@@ -92,7 +96,7 @@ namespace SnippetsLibraryWebApp.Controllers
                         Title = title,
                         Description = description,
                         ProgrammingLanguageID = languageID,
-                        Code = code,
+                        Code = base64Code,
                         Status = status,
                         AuthorID = userID,
                         Categories = categoriesModel,

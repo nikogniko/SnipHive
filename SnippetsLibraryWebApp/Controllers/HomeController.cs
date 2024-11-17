@@ -1,7 +1,13 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Repository;
+using SnippetsLibraryWebApp.ViewModels;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace SnippetsLibraryWebApp.Controllers
 {
@@ -9,16 +15,19 @@ namespace SnippetsLibraryWebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly UserRepository _userRepository;
+        private readonly SnippetRepository _snippetRepository;
 
-        public HomeController(ILogger<HomeController> logger, UserRepository userRepository)
+        public HomeController(ILogger<HomeController> logger, UserRepository userRepository, SnippetRepository snippetRepository)
         {
             _logger = logger;
             _userRepository = userRepository;
+            _snippetRepository = snippetRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var snippets = await _snippetRepository.GetAllPublicSnippetsAsync();
+            return View(snippets);
         }
 
         public IActionResult Privacy()
@@ -57,30 +66,31 @@ namespace SnippetsLibraryWebApp.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> RegisterUser(string username, string email, string password)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterUser(RegisterViewModel model)
         {
             try
             {
                 // ????????? ?? ??????? ????????
-                if (string.IsNullOrEmpty(username))
+                if (string.IsNullOrEmpty(model.username))
                 {
                     return Json(new { success = false, message = "Username cannot be empty" });
                 }
 
-                if (string.IsNullOrEmpty(email))
+                if (string.IsNullOrEmpty(model.email))
                 {
                     return Json(new { success = false, message = "Email cannot be empty" });
                 }
 
-                if (string.IsNullOrEmpty(password))
+                if (string.IsNullOrEmpty(model.password))
                 {
                     return Json(new { success = false, message = "Password cannot be empty" });
                 }
 
                 // ?????? ????????????? ???????????
-                int? userId = await _userRepository.AddUserAsync(username, email, password);
+                int? userId = await _userRepository.AddUserAsync(model.username, model.email, model.password);
 
-                if (userId.HasValue)
+                if (userId.HasValue && Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = true, message = "User registered successfully", userId = userId.Value });
                 }
@@ -95,39 +105,81 @@ namespace SnippetsLibraryWebApp.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> LoginUser(string email, string password)
+        [HttpPost]
+        [Route("/Account/Login")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginUser(LoginViewModel model)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // ????????? ?? ??????? ????????
-                if (string.IsNullOrEmpty(email))
+                try
                 {
-                    return Json(new { success = false, message = "Email cannot be empty" });
-                }
+                    // ????????? ?? ??????? ????????
+                    if (string.IsNullOrEmpty(model.email))
+                    {
+                        return Json(new { success = false, message = "Email cannot be empty" });
+                    }
 
-                if (string.IsNullOrEmpty(password))
-                {
-                    return Json(new { success = false, message = "Password cannot be empty" });
-                }
+                    if (string.IsNullOrEmpty(model.password))
+                    {
+                        return Json(new { success = false, message = "Password cannot be empty" });
+                    }
 
-                // ?????? ??????????? ???????????
-                int? userId = await _userRepository.GetUserIdAsync(email, password);
+                    // ?????? ??????????? ???????????
+                    var user = await _userRepository.GetUserAsync(model.email, model.password);
 
-                if (userId.HasValue)
-                {
-                    // ??????? ??????????? - ????????? ID ???????????
-                    return Json(new { success = true, message = "Login successful", userId = userId.Value });
+                    if (user == null)
+                    {
+                        return Json(new { success = false, message = "Невірний email або пароль" });
+                    }
+
+                    // Створюємо Claims
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.Email, user.Email)
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+
+                    var authProperties = new AuthenticationProperties
+                    {
+                        // Встановіть властивості аутентифікації, якщо потрібно
+                    };
+
+                    await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true, message = "Login successful", Id = user.Id });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Невірний email або пароль" });
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return Json(new { success = false, message = "Invalid email or password" });
+                    return Json(new { success = false, message = $"Error: {ex.Message}" });
                 }
             }
-            catch (Exception ex)
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
+                return Json(new { success = false, message = "Невірний email або пароль" });
             }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Route("/Account/Logout")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync("CookieAuth");
+            return RedirectToAction("AllSnippets", "Snippets");
         }
     }
 }

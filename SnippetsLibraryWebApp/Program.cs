@@ -1,14 +1,18 @@
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Repository;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ������������ ���������� �� ���� �����
+// Íàëàøòóâàííÿ ï³äêëþ÷åííÿ äî áàçè äàíèõ
 builder.Configuration.GetConnectionString("DefaultConnection");
 
-// ������� ���� ������
+// Äîäàéòå ³íø³ ñëóæáè
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ProgrammingLanguageRepository>();
@@ -16,10 +20,16 @@ builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<TagRepository>();
 builder.Services.AddScoped<SnippetRepository>();
 
+// Налаштування аутентифікації (використовуючи кукі)
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Account/Login"; // Шлях до сторінки входу
+    });
 
 var app = builder.Build();
 
-// ������������ middleware (Configure the HTTP request pipeline.)
+// Íàëàøòóâàííÿ middleware (Configure the HTTP request pipeline.)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -32,6 +42,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllerRoute(
     name: "default",
@@ -59,6 +70,10 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "tags",
-    pattern: "{controller=Tags}/{action=AddTag}/{id?}");
+    pattern: "{controller=Tags}/{action=AddTag}/{id?}"); 
+
+app.MapControllerRoute(
+    name: "snippets",
+    pattern: "{controller=Snippets}/{action=GetAllSnippets}/{id?}");
 
 app.Run();
