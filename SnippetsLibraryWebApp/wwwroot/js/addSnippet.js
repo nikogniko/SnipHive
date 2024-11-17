@@ -80,11 +80,6 @@ $(document).ready(function () {
         editor.setOption("mode", mode);
     })
 
-    // Синхронізація CodeMirror з textarea при відправці форми
-    $('form').on('submit', function () {
-        $('#Code').val(editor.getValue());
-    });
-
     // Функція для ініціалізації поведінки випадайки
     function initializeDropdown(dropdownSelector, checkboxSelector, selectedListSelector, maxSelection, type, hasRemoveButton) {
         const dropdown = $(dropdownSelector);
@@ -223,7 +218,7 @@ $(document).ready(function () {
     }
 
     // Опціонально: Обробка відправки форми для перевірки лімітів
-    $('form').on('submit', function (e) {
+    $('#saveSnippet').on('click', function (e) {
         e.preventDefault();
         var selectedCount = $('.category-checkbox:checked').length;
         var selectedTagsCount = $('.tag-checkbox:checked').length;
@@ -328,6 +323,9 @@ $(document).ready(function () {
     }
 
     function gatherAndSubmitFormData() {
+        // Синхронізація CodeMirror з textarea
+        $('#Code').val(editor.getValue());
+
         // Збирання даних із форми
         const title = document.getElementById('Title').value.trim();
         const programmingLanguageID = document.getElementById('ProgrammingLanguageID').value;
@@ -370,13 +368,12 @@ $(document).ready(function () {
             status: status,
             categories: selectedCategories,
             tags: selectedTags,
-            userID: localStorage.getItem("activeUserId")
         };
 
         // Відправлення даних через POST-запит
         try {
             $.ajax({
-                url: "/AddSnippet/AddSnippet",
+                url: "/Snippets/CreateSnippetAsync",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -387,7 +384,7 @@ $(document).ready(function () {
                     status: formData.status,
                     categories: formData.categories,
                     tags: formData.tags,
-                    userID: formData.userID
+                    userID: userID
                 },
                 success: function (response) {
 

@@ -1,4 +1,4 @@
-﻿// wwwroot/js/login.js
+﻿// login.js
 
 $(document).ready(function () {
 
@@ -32,7 +32,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: '/Account/Login',
+            url: '/Account/Login', // Переконайтесь, що шлях правильний
             data: {
                 __RequestVerificationToken: token,
                 Email: email,
@@ -40,26 +40,12 @@ $(document).ready(function () {
             },
             success: function (responseLogin) {
                 if (responseLogin.success) {
-                    $.ajax({
-                        type: 'GET',
-                        url: '/Home/GetUsername',
-                        data: {
-                            userId: responseLogin.id
-                        },
-                        success: function (responseGetUsername) {
-                            //location.reload();
-                            // Save user info to localStorage
-                            localStorage.setItem("activeUserId", responseLogin.id);
-                            localStorage.setItem("activeUserName", responseGetUsername.username);
+                    // Закрити модальне вікно
+                    $('#loginModal').fadeOut();
+                    resetLoginForm();
 
-                            // Update UI
-                            updateAuthUI(true, responseGetUsername.username);
-
-                            // Close modal
-                            $('#loginModal').fadeOut();
-                            resetLoginForm();
-                        }
-                    })
+                    // Перезавантажити сторінку, щоб оновити інтерфейс
+                    location.reload();
                 } else {
                     alert(responseLogin.message);
                 }
@@ -81,18 +67,5 @@ $(document).ready(function () {
     function resetLoginForm() {
         $('#loginForm')[0].reset();
         $('#loginForm').find('.has-error').removeClass('has-error');
-    }
-
-    // Function to update UI based on authentication state
-    function updateAuthUI(authenticated, username) {
-        if (authenticated) {
-            $('.nav-item-login, .nav-item-register').hide();
-            $('.nav-item-add-snippet, .nav-item-user').show();
-            $('#userDropdown').text(username);
-        } else {
-            $('.nav-item-login, .nav-item-register').show();
-            $('.nav-item-add-snippet, .nav-item-user').hide();
-            $('#userDropdown').text('');
-        }
     }
 });

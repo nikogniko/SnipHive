@@ -24,7 +24,8 @@ builder.Services.AddScoped<SnippetRepository>();
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/Account/Login"; // Шлях до сторінки входу
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Error";
     });
 
 var app = builder.Build();
@@ -46,34 +47,42 @@ app.UseAuthentication();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Snippets}/{action=AllSnippets}/{id?}");
 
 app.MapControllerRoute(
-    name: "addSnippet",
-    pattern: "{controller=AddSnippet}/{action=AddSnippet}/{id?}");
+    name: "CreateSnippet",
+    pattern: "{controller=Snippets}/{action=CreateSnippetAsync}");
 
-app.MapControllerRoute(
-    name: "editSnippet",
-    pattern: "{controller=EditSnippet}/{action=EditSnippet}/{id?}");
-
-app.MapControllerRoute(
-    name: "snippetDetails", 
-    pattern: "{controller=SnippetDetails}/{action=SnippetDetails}/{id?}");
-
-app.MapControllerRoute(
-    name: "personalSnippets",
-    pattern: "{controller=PersonalSnippets}/{action=PersonalSnippets}/{id?}");
-
-app.MapControllerRoute(
-    name: "savedSnippets",
-    pattern: "{controller=SavedSnippets}/{action=SavedSnippets}/{id?}");
-
-app.MapControllerRoute(
-    name: "tags",
-    pattern: "{controller=Tags}/{action=AddTag}/{id?}"); 
-
-app.MapControllerRoute(
-    name: "snippets",
-    pattern: "{controller=Snippets}/{action=GetAllSnippets}/{id?}");
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "addSnippet",
+//    pattern: "{controller=AddSnippet}/{action=AddSnippet}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "editSnippet",
+//    pattern: "{controller=EditSnippet}/{action=EditSnippet}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "snippetDetails", 
+//    pattern: "{controller=SnippetDetails}/{action=SnippetDetails}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "personalSnippets",
+//    pattern: "{controller=PersonalSnippets}/{action=PersonalSnippets}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "savedSnippets",
+//    pattern: "{controller=SavedSnippets}/{action=SavedSnippets}/{id?}");
+//
+//app.MapControllerRoute(
+//    name: "tags",
+//    pattern: "{controller=Tags}/{action=AddTag}/{id?}"); 
+//
+//app.MapControllerRoute(
+//    name: "snippets",
+//    pattern: "{controller=Snippets}/{action=GetAllSnippets}/{id?}");
 
 app.Run();

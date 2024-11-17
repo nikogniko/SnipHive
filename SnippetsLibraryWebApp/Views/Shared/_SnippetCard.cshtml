@@ -1,11 +1,13 @@
 ﻿<!-- Views/Snippets/_SnippetCard.cshtml -->
 @model SnippetsLibraryWebApp.Models.SnippetModel
+@using SnippetsLibraryWebApp.Repository
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
 
 <div class="snippet-card" tabindex="0">
     <div class="snippet-header">
         <h3 class="snippet-title">@Model.Title</h3>
         <div class="snippet-meta">
-            <span class="snippet-language">@GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
+            <span class="snippet-language">@await GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
             <span class="snippet-saves">
                 <i class="fas fa-star"></i> @Model.SavesCount
             </span>
@@ -48,20 +50,12 @@
 
 @functions {
     // Метод для отримання назви мови програмування за її ID
-    public string GetProgrammingLanguageName(int id)
+    public async Task<string> GetProgrammingLanguageName(int id)
     {
         // Реалізуйте логіку для отримання назви мови програмування
-        var languages = new Dictionary<int, string>
-        {
-            { 1, "C#" },
-            { 2, "C++" },
-            { 3, "Java" },
-            { 4, "Python" },
-            { 5, "JavaScript" },
-            // Додайте інші мови відповідно до вашої бази даних
-        };
+        var languages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
 
-        return languages.ContainsKey(id) ? languages[id] : "Unknown";
+        return languages.Any(x => x.ID == id) ? languages.Where(x => x.ID == id).FirstOrDefault().Name : "Unknown";
     }
 
     // Метод для отримання імені автора за його ID

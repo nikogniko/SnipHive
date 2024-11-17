@@ -12,6 +12,7 @@ $(document).ready(function () {
         var passwordInput = $('#registerPassword');
         var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
         passwordInput.attr('type', type);
+        $(this).text(type === 'password' ? 'Show' : 'Hide');
     });
 
     // Function to handle registration form submission
@@ -37,26 +38,22 @@ $(document).ready(function () {
             return;
         }
 
+        // Отримати Anti-Forgery Token
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
         $.ajax({
             type: 'POST',
-            url: '/Home/RegisterUser',
+            url: '/Account/RegisterUser',
             data: {
+                __RequestVerificationToken: token, // Додати токен
                 username: username,
                 email: email,
                 password: password
             },
             success: function (response) {
                 if (response.success) {
-                    // Save user info to localStorage
-                    localStorage.setItem("activeUserId", response.userId);
-                    localStorage.setItem("activeUserName", username);
-
-                    // Update UI
-                    updateAuthUI(true, username);
-
-                    // Close modal
-                    $('#registerModal').fadeOut();
-                    resetRegisterForm();
+                    // Оновити UI без використання localStorage, оскільки ми використовуємо серверну автентифікацію
+                    location.reload(); // Перезавантажити сторінку, щоб оновити навігаційні елементи
                 } else {
                     alert(response.message);
                 }
@@ -78,18 +75,5 @@ $(document).ready(function () {
     function resetRegisterForm() {
         $('#registerForm')[0].reset();
         $('#registerForm').find('.has-error').removeClass('has-error');
-    }
-
-    // Function to update UI based on authentication state
-    function updateAuthUI(authenticated, username) {
-        if (authenticated) {
-            $('.nav-item-login, .nav-item-register').hide();
-            $('.nav-item-add-snippet, .nav-item-user').show();
-            $('#userDropdown').text(username);
-        } else {
-            $('.nav-item-login, .nav-item-register').show();
-            $('.nav-item-add-snippet, .nav-item-user').hide();
-            $('#userDropdown').text('');
-        }
     }
 });
