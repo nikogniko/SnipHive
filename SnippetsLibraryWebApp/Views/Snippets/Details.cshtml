@@ -1,12 +1,22 @@
 ﻿@model SnippetsLibraryWebApp.Models.SnippetModel
 @using SnippetsLibraryWebApp.Repository
+@using System.Security.Claims
 @inject ProgrammingLanguageRepository _programmingLanguageRepository
 @inject UserRepository _userRepository
 @inject CategoryRepository _categoryRepository
 @inject TagRepository _tagRepository
+@inject SnippetRepository _snippetRepository
 
 @{
     ViewData["Title"] = "Деталі сніпета";
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    bool isSaved = false;
+
+    if (User.Identity.IsAuthenticated)
+    {
+        // Перевірка, чи сніпет вже збережено користувачем
+        isSaved = await _snippetRepository.IsSnippedSavedByUser(int.Parse(userId), Model.ID);
+    }
 }
 
 <div class="page-container">
@@ -59,6 +69,10 @@
 
                 <div class="form-group form-buttons">
                     <a href="@Url.Action("AllSnippets", "Snippets")" class="btn secondary-btn">Повернутися до списку</a>
+                    @if(Model.AuthorID == Convert.ToInt32(userId))
+                    {
+                        <a href="/Snippets/EditSnippet/@Model.ID" class="btn secondary-btn">Редагувати</a>
+                    }
                 </div>
             </form>
         </div>
@@ -66,7 +80,36 @@
         <!-- Друга частина з блоком коду -->
         <div class="form-code-section">
             <div class="form-group">
-                <label for="ViewCode">Код</label>
+                <table style="width:100%; align-self:stretch; align-content:stretch">
+                    <tr>
+                        <td>
+                            <label for="ViewCode">Код</label>
+                        </td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="align-content:flex-end">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <div class="form-check form-switch ms-3">
+                                    <input class="form-check-input" style="display: none" type="checkbox" id="saveSnippetSwitch" @(isSaved ? "checked" : "") data-snippet-id="@Model.ID">
+                                    <label class="form-check-label" for="saveSnippetSwitch">
+                                        @if (isSaved)
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-muted"></i>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                </table>
                 <div class="code-editor-container">
                     <textarea id="ViewCode" name="ViewCode" class="CodeMirror" style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
                 </div>
@@ -75,10 +118,12 @@
     </div>
 </div>
 
+<!-- Підключення Font Awesome для іконок -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <!-- Підключення CodeMirror JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
 <!-- CodeMirror Основний CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.5/codemirror.min.css">
 <!-- Мови CodeMirror (наприклад, JavaScript, Python, тощо) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
@@ -166,6 +211,42 @@
             theme: "monokai",
             readOnly: true, // Робить редактор не редагованим
             viewportMargin: Infinity // Розгортає редактор на весь контент
+        });
+
+        // Обробка події перемикання
+        var saveSwitch = document.getElementById("saveSnippetSwitch");
+        saveSwitch.addEventListener("change", function () {
+            var snippetId = this.getAttribute("data-snippet-id");
+            var isChecked = this.checked;
+
+            $.ajax({
+                url: '@Url.Action("AddSnippetToSavedAsync", "Snippets")',
+                type: 'POST',
+                data: {
+                    userId: '@userId',
+                    snippetId: snippetId
+                },
+                success: function (response) {
+                    if(!response.success) {
+                        alert("Виникла помилка!")
+                        return;
+                    }
+
+                    // Зміна стану перемикача
+                    saveSwitch.checked = response.isSaved;
+
+                    if (response.isSaved) {
+                        saveSwitch.nextElementSibling.innerHTML = '<i class="fas fa-star text-warning"></i>';
+                    } else {
+                        saveSwitch.nextElementSibling.innerHTML = '<i class="far fa-star text-muted"></i>';
+                    }
+                },
+                error: function () {
+                    alert("Сталася помилка при обробці вашого запиту.");
+                    // Відкотити стан перемикача
+                    saveSwitch.checked = !isChecked;
+                }
+            });
         });
     });
 </script>

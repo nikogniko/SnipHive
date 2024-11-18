@@ -729,3 +729,54 @@ input[type="radio"]:checked + .toggle-label {
     margin-right: 5px;
     margin-bottom: 5px;
 }
+
+/* Стилізація кнопки збереження сніпета */
+.save-snippet-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5em 1em;
+    background-color: #f0f0f0; /* Світло-сірий фон */
+    border: none;
+    border-radius: 20px; /* Заокруглені краї */
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .save-snippet-btn:hover {
+        background-color: #e0e0e0; /* Темніше при наведенні */
+    }
+
+    .save-snippet-btn .fa-star {
+        margin-right: 0.5em;
+        font-size: 1.2rem;
+    }
+
+    .save-snippet-btn.saved {
+        background-color: #ffe58f; /* Жовтий фон для збереженого сніпета */
+    }
+
+        .save-snippet-btn.saved .fa-star {
+            color: #ffc107; /* Жовта зірочка */
+        }
+
+
+/* Стилізація кнопки перемикача */
+.form-check.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    margin-left: 0.5em;
+    cursor: pointer;
+}
+
+/* Стилізація іконок та тексту */
+.form-check.form-switch .form-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    cursor: pointer;
+}
+
+    .form-check.form-switch .form-check-label i {
+        font-size: 1.2rem;
+    }

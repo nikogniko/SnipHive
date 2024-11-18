@@ -35,6 +35,28 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        public async Task<bool> IsSnippedSavedByUser(int userId, int snippetId)
+        {
+            string connectionString = ConfigurationHelper.GetConnectionString();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT UserId, SnippetId FROM SavedSnippets WHERE UserID = @userId AND SnippetID = @snippetId";
+
+                var result = (await connection.QueryAsync(query, new { userId, snippetId })).FirstOrDefault();
+
+                if(result != null &&
+                    result.UserId != null &&
+                    result.SnippetId != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public async Task<IEnumerable<SnippetModel>> GetAllSnippetsAsync()
         {
             string connectionString = ConfigurationHelper.GetConnectionString();
@@ -293,7 +315,7 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT Snippet.ID AS SnippetID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, 
+                    SELECT Snippet.ID AS ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, 
                            Code, Status, COUNT(SavedSnippets.UserID) AS SavesCount
                     FROM SavedSnippets
                     LEFT JOIN Snippet ON Snippet.ID = SavedSnippets.SnippetID
