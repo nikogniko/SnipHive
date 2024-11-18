@@ -1,10 +1,7 @@
-﻿@model SnippetsLibraryWebApp.ViewModels.EditSnippetViewModel
-
+﻿@using System.Security.Claims
 @using SnippetsLibraryWebApp.Repository
-@using System.Security.Claims
-@inject CategoryRepository _categoryRepository;
-@inject TagRepository _tagRepository;
-
+@model SnippetsLibraryWebApp.ViewModels.EditSnippetViewModel
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
 @{
     ViewData["Title"] = "Редагувати сніпет";
 }
@@ -14,7 +11,7 @@
     <div class="form-sections-container">
         <!-- Перша частина з деталями сніпета -->
         <div class="form-details-section">
-            <form asp-action="EditSnippet" method="post">
+            <form id="editSnippetForm" asp-action="EditSnippet" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="ID" value="@Model.ID" />
 
@@ -109,16 +106,17 @@
             </form>
 
             <script>
-                var userID = @int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userID = '@int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)';
+                var languageName = '@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)';
             </script>
-        </div>
 
-        <!-- Друга частина з блоком коду -->
-        <div class="form-code-section">
-            <div class="form-group">
-                <label for="Code">Код <span class="required">*</span></label>
-                <div class="code-editor-container">
-                    <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
+            <!-- Друга частина з блоком коду -->
+            <div class="form-code-section">
+                <div class="form-group">
+                    <label for="Code">Код <span class="required">*</span></label>
+                    <div class="code-editor-container">
+                        <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
+                    </div>
                 </div>
             </div>
         </div>

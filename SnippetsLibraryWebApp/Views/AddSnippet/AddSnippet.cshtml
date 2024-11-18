@@ -14,7 +14,7 @@
     <div class="form-sections-container">
         <!-- Перша частина з деталями сніпета -->
         <div class="form-details-section">
-            <form asp-action="AddSnippet" method="post">
+            <form id="addSnippetForm" asp-action="AddSnippet" method="post">
                 <div class="form-group">
                     <label for="Title">Назва <span class="required">*</span></label>
                     <textarea type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required></textarea>
@@ -96,6 +96,7 @@
 
             <script>
                 var userID = '@userId';
+                var languageName = false;
             </script>
 
         </div>

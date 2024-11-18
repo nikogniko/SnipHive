@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using SnippetsLibraryWebApp.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace SnippetsLibraryWebApp.Repository
 {
@@ -19,7 +20,7 @@ namespace SnippetsLibraryWebApp.Repository
             _tagRepository = tagRepository;
         }
 
-        private async Task<bool> IsUserAuthorOfSnippetAsync(int snippetId, int userId)
+        public async Task<bool> IsUserAuthorOfSnippetAsync(int snippetId, int userId)
         {
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
@@ -33,6 +34,38 @@ namespace SnippetsLibraryWebApp.Repository
                 var isAuthor = await connection.ExecuteScalarAsync<bool>(query, new { SnippetID = snippetId, UserID = userId });
                 return isAuthor;
             }
+        }
+
+        public async Task<IEnumerable<SnippetModel>> GetFilteredSnippetsAsync(int? authorId, List<int> categoryIds, List<int> tagIds, int? programmingLanguageId, string searchQuery)
+        {
+            IQueryable<SnippetModel> query = Enumerable.Empty<SnippetModel>().AsQueryable();
+
+            if (authorId.HasValue)
+            {
+                query = query.Where(s => s.AuthorID == authorId.Value);
+            }
+
+            if (categoryIds != null && categoryIds.Any())
+            {
+                query = query.Where(s => s.Categories.Any(c => categoryIds.Contains(c.ID)));
+            }
+
+            if (tagIds != null && tagIds.Any())
+            {
+                query = query.Where(s => s.Tags.Any(t => tagIds.Contains(t.ID)));
+            }
+
+            if (programmingLanguageId.HasValue)
+            {
+                query = query.Where(s => s.ProgrammingLanguageID == programmingLanguageId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(s => s.Title.Contains(searchQuery));
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<bool> IsSnippedSavedByUser(int userId, int snippetId)
@@ -79,6 +112,7 @@ namespace SnippetsLibraryWebApp.Repository
                     snippet.Tags = await GetTagsBySnippetIdAsync(snippet.ID);*/
                     snippet.Categories = await _categoryRepository.GetCategoriesBySnippetIdAsync(snippet.ID);
                     snippet.Tags = await _tagRepository.GetTagsBySnippetIdAsync(snippet.ID);
+                    snippet.Code = Base64Helper.Base64Decode(snippet.Code);
                 }
                 return snippets;
             }
@@ -134,7 +168,7 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
-        public async Task<bool> UpdateSnippetAsync(SnippetModel snippet, int userId)
+        public async Task<bool> UpdateSnippetAsync(SnippetModel snippet, int userId, bool areCategoriesChanged, bool areTagsChanged)
         {
             var base64Code = Base64Helper.Base64Encode(snippet.Code);
 
@@ -169,17 +203,17 @@ namespace SnippetsLibraryWebApp.Repository
                             snippet.Title,
                             snippet.Description,
                             snippet.ProgrammingLanguageID,
-                            base64Code,
+                            Code = base64Code,
                             snippet.Status,
                             SnippetID = snippet.ID
                         }, transaction);
 
 
                         // Перевірка та оновлення категорій, якщо необхідно
-                        bool areCategoriesUpdated = await _categoryRepository.UpdateSnippetCategoriesAsync(snippet.ID, snippet.Categories, connection, transaction);
+                        bool areCategoriesUpdated = await _categoryRepository.UpdateSnippetCategoriesAsync(snippet.ID, snippet.Categories, connection, transaction, areCategoriesChanged);
 
                         // Перевірка та оновлення тегів, якщо необхідно
-                        bool areTagsUpdated = await _tagRepository.UpdateSnippetTagsAsync(snippet.ID, snippet.Tags, connection, transaction);
+                        bool areTagsUpdated = await _tagRepository.UpdateSnippetTagsAsync(snippet.ID, snippet.Tags, connection, transaction, areTagsChanged);
 
                         if (rowsAffected == 0 && !areCategoriesUpdated && !areTagsUpdated)
                         {

@@ -7,7 +7,7 @@ using System.Text;
 namespace SnippetsLibraryWebApp.Repository
 {
     public class UserRepository
-    {  
+    {
         public async Task<string> GetUsernameByIdAsync(int userId)
         {
             try

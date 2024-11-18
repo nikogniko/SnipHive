@@ -127,10 +127,10 @@ namespace SnippetsLibraryWebApp.Repository
             return !existingTagIds.SetEquals(newTagIds);
         }
 
-        public async Task<bool> UpdateSnippetTagsAsync(int snippetId, IEnumerable<TagModel> tags, SqlConnection connection, SqlTransaction transaction)
+        public async Task<bool> UpdateSnippetTagsAsync(int snippetId, IEnumerable<TagModel> tags, SqlConnection connection, SqlTransaction transaction, bool areCategoriesChanged)
         {
             // Перевірка та оновлення тегів, якщо необхідно
-            if (await AreTagsChangedAsync(snippetId, tags))
+            if (await AreTagsChangedAsync(snippetId, tags) || areCategoriesChanged)
             {
                 // Видалення старих зв'язків
                 string deleteTagsSql = "DELETE FROM SnippetTag WHERE SnippetID = @SnippetID";

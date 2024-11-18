@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json.Linq;
 using SnippetsLibraryWebApp.Extensions;
 using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Repository;
@@ -143,16 +144,59 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                if (model.Categories == null || model.Categories.Count() == 0)
+                {
+                    model.Categories = new List<CategoryModel>();
+
+                    if(selectedCategories.Length > 0)
+                    {
+                        foreach(var categoryId in selectedCategories)
+                        {
+                            model.Categories.Add(await _categoryRepository.GetCategoryByIdAsync(categoryId));
+                        }
+                    }
+                }
+
+                if (model.Tags == null || model.Tags.Count() == 0)
+                {
+                    model.Tags = new List<TagModel>();
+
+                    if (selectedTags.Length > 0)
+                    {
+                        foreach (var tagId in selectedTags)
+                        {
+                            model.Tags.Add(await _tagRepository.GetTagsByIdAsync(tagId));
+                        }
+                    }
+                }
                 // Повторно завантажити категорії та теги, якщо модель не валідна
-                model.Categories = (await _categoryRepository.GetCategoriesBySnippetIdAsync(model.ID)).ToList();
-                model.Tags = (await _tagRepository.GetTagsBySnippetIdAsync(model.ID)).ToList();
-                return View(model);
+                //model.Categories = (await _categoryRepository.GetCategoriesBySnippetIdAsync(model.ID)).ToList();
+                //model.Tags = (await _tagRepository.GetTagsBySnippetIdAsync(model.ID)).ToList();
             }
 
             var existingSnippet = await _snippetsRepository.GetSnippetByIdAsync(model.ID);
             if (existingSnippet == null)
             {
                 return Forbid();
+            }
+
+            var areCategoriesChanged = existingSnippet.Categories.Count() != model.Categories.Count();
+            var areTagsChanged = existingSnippet.Tags.Count() != model.Tags.Count();
+
+            for(var i = 0; i < Math.Min(existingSnippet.Categories.Count(), model.Categories.Count()); i++)
+            {
+                if (existingSnippet.Categories.ElementAt(i).ID != model.Categories.ElementAt(i).ID)
+                {
+                    areCategoriesChanged = true;
+                }
+            }
+
+            for (var i = 0; i < Math.Min(existingSnippet.Tags.Count(), model.Tags.Count()); i++)
+            {
+                if (existingSnippet.Tags.ElementAt(i).ID != model.Tags.ElementAt(i).ID)
+                {
+                    areTagsChanged = true;
+                }
             }
 
             // Оновлення полів сніпета
@@ -162,15 +206,20 @@ namespace SnippetsLibraryWebApp.Controllers
             existingSnippet.Status = model.Status;
             existingSnippet.Code = model.Code;
             existingSnippet.UpdatedAt = DateTime.UtcNow;
-
-            // Оновлення категорій та тегів
-            //await _snippetsRepository.UpdateCategoriesAsync(existingSnippet.ID, categories);
-            //await _snippetsRepository.UpdateTagsAsync(existingSnippet.ID, tags);
+            existingSnippet.Tags = model.Tags;
+            existingSnippet.Categories = model.Categories;
 
             // Збереження змін
-            await _snippetsRepository.UpdateSnippetAsync(existingSnippet, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
+            var result = await _snippetsRepository.UpdateSnippetAsync(existingSnippet, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value), areCategoriesChanged, areTagsChanged);
 
-            return RedirectToAction("Details", new { id = existingSnippet.ID });
+            if (result)
+            {
+                return Json(new { success = true, formType = "edit" });
+            }
+            else
+            {
+                return Json(new { success = false, formType = "edit" });
+            }
         }
 
         [HttpPost]
@@ -287,7 +336,7 @@ namespace SnippetsLibraryWebApp.Controllers
 
         [HttpPost]
         [Route("/Snippets/CreateSnippetAsync")]
-        public async Task<IActionResult> CreateSnippetAsync(string title, string description, int languageID, string code,
+        public async Task<IActionResult> CreateSnippetAsync(string title, string description, int programmingLanguageID, string code,
                 string status, int[] categories, int[] tags, int userID)
         {
             try
@@ -310,7 +359,7 @@ namespace SnippetsLibraryWebApp.Controllers
                 {
                     Title = title,
                     Description = description,
-                    ProgrammingLanguageID = languageID,
+                    ProgrammingLanguageID = programmingLanguageID,
                     Code = code,
                     Status = status,
                     AuthorID = userID,
@@ -321,8 +370,14 @@ namespace SnippetsLibraryWebApp.Controllers
                 // Додаємо сніпет до бази даних
                 var snippetId = await _snippetsRepository.AddSnippetAsync(newSnippet);
 
-                // Повертаємо успішну відповідь з ID нового сніпета
-                return Ok(new { SnippetID = snippetId });
+                if (snippetId.HasValue)
+                {
+                    return Json(new { success = true, formType = "add", SnippetID = snippetId });
+                }
+                else
+                {
+                    return Json(new { success = false, formType = "add" });
+                }
             }
             catch (Exception ex)
             {

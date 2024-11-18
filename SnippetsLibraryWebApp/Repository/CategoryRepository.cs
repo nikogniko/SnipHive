@@ -78,10 +78,10 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         public async Task<bool> UpdateSnippetCategoriesAsync(int snippetId, IEnumerable<CategoryModel> categories,
-            SqlConnection connection, SqlTransaction transaction)
+            SqlConnection connection, SqlTransaction transaction, bool areCategoriesChanged)
         {
             // Перевірка та оновлення категорій, якщо необхідно
-            if (await AreCategoriesChangedAsync(snippetId, categories))
+            if (await AreCategoriesChangedAsync(snippetId, categories) || areCategoriesChanged)
             {
                 // Видалення старих зв'язків
                 string deleteCategoriesSql = "DELETE FROM SnippetCategory WHERE SnippetID = @SnippetID";

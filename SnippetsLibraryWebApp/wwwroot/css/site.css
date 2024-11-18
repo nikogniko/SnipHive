@@ -780,3 +780,40 @@ input[type="radio"]:checked + .toggle-label {
     .form-check.form-switch .form-check-label i {
         font-size: 1.2rem;
     }
+
+/* Стилі для фільтрів */
+
+.filter-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+    .filter-item label {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .filter-item select,
+    .filter-item input {
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+.btn {
+    margin-top: 22px;
+}
+

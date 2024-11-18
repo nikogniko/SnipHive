@@ -1,9 +1,9 @@
 ﻿// wwwroot/js/addSnippet.js
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     const maxCategories = 3;
     const maxTags = 6; // Встановіть ліміт для тегів за потребою або видаліть, якщо без ліміту
-    var language = "plaintext";
+    var language = languageName || "plaintext"
 
     const languageModes = {
         bash: "shell",
@@ -47,40 +47,170 @@ $(document).ready(function () {
         yaml: "yaml",
     };
 
+    language = language == "C#" ? "csharp" :
+        language == "C++" ? "cpp" :
+            language == "F#" ? "fsharp" :
+                language == "VB.NET" ? "vbnet" :
+                    language == "PL/SQL" ? "plsql" :
+                        language == "Objective-C" ? "objectivec" :
+                            language == "T-SQL" ? "tsql" :
+                                language == "Visual Basic" ? "vbnet" :
+                                    language == "Shell script" ? "shell" : language
 
-    // Ініціалізація випадайок з hasRemoveButton=true для обох
-    initializeDropdown('#categoryDropdown', '.category-checkbox', '#selectedCategories', maxCategories, 'category', true);
-    initializeDropdown('#tagDropdown', '.tag-checkbox', '#selectedTags', maxTags, 'tag', true); // Встановлено на true для тегів
+    var mode = languageModes[language.toString().toLowerCase()] || "plaintext"
 
-    var editor = CodeMirror.fromTextArea(document.getElementById('Code'), {
-        mode: "plaintext",
-        theme: "monokai",
-        lineNumbers: true,
-        matchBrackets: true,
-        autoCloseTags: true,
-        lineWrapping: true,
-    });
-    editor.save()
+    // Перевірте, чи присутній будь-який з форм
+    var isAddForm = $('#addSnippetForm').length > 0;
+    var isEditForm = $('#editSnippetForm').length > 0;
 
-    $('#ProgrammingLanguageID').on('change', function (e) {
-        language = $('#ProgrammingLanguageID')[0].selectedOptions[0].text
+    if (isAddForm) {
+        initializeForm('#addSnippetForm', '/Snippets/CreateSnippetAsync', 'add');
+    }
 
-        language = language == "C#" ? "csharp" :
-            language == "C++" ? "cpp" :
-                language == "F#" ? "fsharp" :
-                    language == "VB.NET" ? "vbnet" :
-                        language == "PL/SQL" ? "plsql" :
-                            language == "Objective-C" ? "objectivec" :
-                                language == "T-SQL" ? "tsql" :
-                                    language == "Visual Basic" ? "vbnet" :
-                                        language == "Shell script" ? "shell" : language
+    if (isEditForm) {
+        initializeForm('#editSnippetForm', '/Snippets/EditSnippet', 'edit');
+    }
 
-        var mode = languageModes[language.toLowerCase()] || "plaintext"
+    function initializeForm(formSelector, submitUrl, formType) {
+        const form = $(formSelector);
 
-        editor.setOption("mode", mode);
-    })
+        // Ініціалізація випадайок
+        initializeDropdown(form.find('.category-select-container #categoryDropdown'), '.category-checkbox', form.find('#selectedCategories'), maxCategories, 'category', true);
+        initializeDropdown(form.find('.tag-select-container #tagDropdown'), '.tag-checkbox', form.find('#selectedTags'), maxTags, 'tag', true);
 
-    // Функція для ініціалізації поведінки випадайки
+        // Ініціалізація CodeMirror
+        var editor = CodeMirror.fromTextArea(document.getElementById('Code'), {
+            mode: mode,
+            theme: "monokai",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseTags: true,
+            lineWrapping: true,
+        });
+        editor.save();
+
+        // Обробка зміни мови програмування
+        form.find('#ProgrammingLanguageID').on('change', function (e) {
+            language = form.find('#ProgrammingLanguageID option:selected').text();
+            language = language == "C#" ? "csharp" :
+                language == "C++" ? "cpp" :
+                    language == "F#" ? "fsharp" :
+                        language == "VB.NET" ? "vbnet" :
+                            language == "PL/SQL" ? "plsql" :
+                                language == "Objective-C" ? "objectivec" :
+                                    language == "T-SQL" ? "tsql" :
+                                        language == "Visual Basic" ? "vbnet" :
+                                            language == "Shell script" ? "shell" : language
+
+            var mode = languageModes[language.toString().toLowerCase()] || "plaintext"
+            editor.setOption("mode", mode);
+        });
+
+        // Обробка відправки форми
+        form.on('submit', function (e) {
+            e.preventDefault();
+
+            // Валідація вибору категорій і тегів
+            var selectedCategories = form.find('.category-checkbox:checked').length;
+            var selectedTags = form.find('.tag-checkbox:checked').length;
+
+            if (selectedCategories > maxCategories) {
+                alert("Ви можете обрати максимум 3 категорії.");
+                return;
+            }
+
+            if (selectedTags > maxTags) {
+                alert("Ви можете обрати максимум 6 тегів.");
+                return;
+            }
+
+            // Синхронізація CodeMirror з textarea
+            $('#Code').val(editor.getValue());
+
+            // Збирання даних форми
+            var formData = form.serializeArray();
+            var data = {};
+            formData.forEach(function (item) {
+                if (data[item.name]) {
+                    if (Array.isArray(data[item.name])) {
+                        data[item.name].push(item.value);
+                    } else {
+                        data[item.name] = [data[item.name], item.value];
+                    }
+                } else {
+                    data[item.name] = item.value;
+                }
+            });
+
+            const categoryCheckboxes = document.querySelectorAll('.category-checkbox:checked');
+            const tagCheckboxes = document.querySelectorAll('.tag-checkbox:checked');
+
+            // Отримання ID вибраних категорій
+            const selectedCategoriesList = Array.from(categoryCheckboxes).map(checkbox => parseInt(checkbox.value));
+
+            // Отримання ID вибраних тегів
+            const selectedTagsList = Array.from(tagCheckboxes).map(checkbox => parseInt(checkbox.value));
+
+            data.Code = $('#Code')[0].value
+            data.Categories = selectedCategoriesList
+            data.Tags = selectedTagsList
+            data.userID = userID
+
+            // Відправлення даних через AJAX
+            $.ajax({
+                url: submitUrl,
+                type: "POST",
+                dataType: "json",
+                data: data,
+                success: function (response) {
+                    if (formType === 'add') {
+                        if (response.snippetID) {
+                            alert(`Сніпет успішно додано! ID: ${response.snippetID}`);
+                            window.location.href = `/Snippets/Details/${response.snippetID}`;
+                        } else {
+                            alert('При створенні сніпета виникла помилка!');
+                        }
+                    } else if (formType === 'edit') {
+                        if (response.success) {
+                            alert('Сніпет успішно оновлено!');
+                            window.location.href = `/Snippets/Details/${data.ID}`;
+                        } else {
+                            alert('При оновленні сніпета виникла помилка!');
+                        }
+                    }
+                },
+                error: function () {
+                    alert('Сталася помилка при відправці запиту.');
+                }
+            });
+        });
+
+        // Автоматичне змінювання висоти textarea для опису та назви
+        form.find('textarea#Description, textarea#Title').on('input', function () {
+            autoResize(this);
+        });
+
+        // Функція для автозміни розміру textarea
+        function autoResize(element) {
+            element.style.height = 'auto'; // Спочатку встановлюємо висоту на автоматичну
+            element.style.height = (element.scrollHeight) + 'px'; // Змінюємо висоту на основі scrollHeight
+        }
+
+        // Обробка додавання нових тегів (за потреби)
+        form.find('#addTagBtn').on('click', function () {
+            var newTag = form.find('#addTag').val().trim();
+            if (newTag) {
+                // Додайте логіку для додавання тегів
+                // Наприклад, додавання нового чекбоксу
+                var newTagId = Date.now(); // Тимчасовий ID, замініть на реальний, якщо потрібно
+                var checkbox = $('<label class="checkbox-label"><input type="checkbox" class="tag-checkbox" name="tags" value="' + newTagId + '" checked /> ' + newTag + '</label>');
+                form.find('.dropdown-content').first().append(checkbox);
+                form.find('#addTag').val('');
+                // Оновіть відображення вибраних тегів
+            }
+        });
+    }
+
     function initializeDropdown(dropdownSelector, checkboxSelector, selectedListSelector, maxSelection, type, hasRemoveButton) {
         const dropdown = $(dropdownSelector);
         const dropdownList = dropdown.find('.dropdown-content');
@@ -159,8 +289,8 @@ $(document).ready(function () {
             }
         }
 
-        // Делегування події кліку для видалення (тільки для категорій)
-        if (hasRemoveButton) {
+        // Делегування події кліку для видалення категорій
+        if (hasRemoveButton && type === 'category') {
             selectedList.on('click', `.remove-${type}`, function () {
                 const itemTag = $(this).parent(`.selected-${type}`);
                 const itemId = itemTag.data('id');
@@ -180,7 +310,7 @@ $(document).ready(function () {
                 }
             });
 
-            // Обробка клавіатурних подій для видалення
+            // Обробка клавіатурних подій для видалення категорій
             selectedList.on('keydown', `.remove-${type}`, function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -198,209 +328,25 @@ $(document).ready(function () {
                 // Відмічаємо відповідний чекбокс
                 $(`${checkboxSelector}[value="${itemId}"]`).prop('checked', false);
 
-                // Додаємо клас для анімації
-                itemTag.addClass('removing');
+                // Видаляємо тег з відображення
+                itemTag.remove();
 
-                // Видаляємо тег після завершення анімації
-                setTimeout(function () {
-                    itemTag.remove();
-                }, 300); // Час має відповідати тривалості анімації CSS
+                // Оновлення плейсхолдера випадайки
+                const selectedCount = $(checkboxSelector + ':checked').length;
+                if (selectedCount > 0) {
+                    dropdown.find('.dropdown-placeholder').text(`${selectedCount} обрано`);
+                } else {
+                    dropdown.find('.dropdown-placeholder').text(`--Оберіть ${type === 'category' ? 'до 3-х категорій' : 'теги'}--`);
+                }
             });
 
             // Обробка клавіатурних подій для видалення тегів
-            selectedList.on('keydown', '.remove-tag', function (e) {
+            selectedList.on('keydown', `.remove-${type}`, function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     $(this).click();
                 }
             });
-        }
-    }
-
-    // Опціонально: Обробка відправки форми для перевірки лімітів
-    $('#saveSnippet').on('click', function (e) {
-        e.preventDefault();
-        var selectedCount = $('.category-checkbox:checked').length;
-        var selectedTagsCount = $('.tag-checkbox:checked').length;
-
-        if (selectedCount > maxCategories) {
-            alert("Ви можете обрати максимум 3 категорії.");
-            e.preventDefault(); // Запобігаємо відправці форми
-        }
-
-        if (selectedTagsCount > maxTags) {
-            alert("Ви можете обрати максимум 5 тегів.");
-            e.preventDefault(); // Запобігаємо відправці форми
-        }
-
-        gatherAndSubmitFormData(); // Виклик функції для збирання та відправлення даних
-    });
-    function autoResize(element) {
-        element.style.height = 'auto'; // Спочатку встановлюємо висоту на автоматичну
-        element.style.height = (element.scrollHeight) + 'px'; // Змінюємо висоту на основі scrollHeight
-    }
-
-    const description = document.getElementById('Description');
-    const title = document.getElementById('Title');
-
-    description.addEventListener('input', function () {
-        autoResize(this);
-    });
-
-    title.addEventListener('input', function () {
-        autoResize(this);
-    });
-
-    document.getElementById('addTagBtn').addEventListener('click', async function () {
-        // Отримуємо значення тега
-        const tagInput = document.getElementById('addTag').value.trim();
-
-        // Перевіряємо, чи введено тільки одне слово
-        if (!/^[^\s]+$/.test(tagInput)) {
-            alert('Тег має складатися з одного слова без пробілів.');
-            return;
-        }
-
-        try {
-            // Відправляємо POST-запит на сервер для додавання тега
-            $.ajax({
-                url: '/Tags/AddTag',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    tagName: tagInput
-                },
-                success: function (response) {
-                    if (response.success) {
-                        alert('Тег додано успішно!');
-
-                        // Викликаємо функцію для оновлення випадаючого списку тегів
-                        loadTags();
-                    } else {
-                        alert('Не вдалося додати тег. Спробуйте ще раз.');
-                    }
-                }
-            })
-        } catch (error) {
-            console.error('Error adding tag:', error);
-            alert('Сталася помилка при додаванні тега.');
-        }
-    });
-
-    function loadTags() {
-        $.ajax({
-            url: '/Tags/GetAllTags',
-            type: 'GET',
-            dataType: 'json',
-            success: function (tags) {
-                const previouslySelected = getSelectedTags();
-
-                $('#dropdownTagList').empty();
-                tags.forEach(function (tag) {
-                    const isChecked = previouslySelected.includes(tag.id.toString()) ? 'checked' : '';
-                    const checkboxLabel = `
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="tag-checkbox" value="${tag.id}" ${isChecked} />
-                        ${tag.name}
-                    </label>
-                `;
-                    $('#dropdownTagList').append(checkboxLabel);
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading tags:', error);
-                alert('Сталася помилка при завантаженні тегів.');
-            }
-        });
-    }
-
-    function getSelectedTags() {
-        const selected = [];
-        $('.tag-checkbox:checked').each(function () {
-            selected.push($(this).val());
-        });
-        return selected;
-    }
-
-    function gatherAndSubmitFormData() {
-        // Синхронізація CodeMirror з textarea
-        $('#Code').val(editor.getValue());
-
-        // Збирання даних із форми
-        const title = document.getElementById('Title').value.trim();
-        const programmingLanguageID = document.getElementById('ProgrammingLanguageID').value;
-        const description = document.getElementById('Description').value.trim();
-        const code = document.getElementById('Code').value;
-        const status = document.querySelector('input[name="Status"]:checked')?.value;
-        const categoryCheckboxes = document.querySelectorAll('.category-checkbox:checked');
-        const tagCheckboxes = document.querySelectorAll('.tag-checkbox:checked');
-
-        // Валідація даних
-        if (!title || title.length > 200) {
-            alert('Поле "Назва" є обов’язковим і не повинно перевищувати 200 символів.');
-            return;
-        }
-        if (!programmingLanguageID) {
-            alert('Будь ласка, оберіть мову програмування.');
-            return;
-        }
-        if (!status) {
-            alert('Будь ласка, оберіть статус.');
-            return;
-        }
-        if (!code) {
-            alert('Поле "Код" є обов’язковим.');
-            return;
-        }
-
-        // Отримання ID вибраних категорій
-        const selectedCategories = Array.from(categoryCheckboxes).map(checkbox => parseInt(checkbox.value));
-
-        // Отримання ID вибраних тегів
-        const selectedTags = Array.from(tagCheckboxes).map(checkbox => parseInt(checkbox.value));
-
-        // Формування об'єкта з даними
-        const formData = {
-            title: title,
-            description: description,
-            languageID: parseInt(programmingLanguageID),
-            code: code,
-            status: status,
-            categories: selectedCategories,
-            tags: selectedTags,
-        };
-
-        // Відправлення даних через POST-запит
-        try {
-            $.ajax({
-                url: "/Snippets/CreateSnippetAsync",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    title: formData.title,
-                    description: formData.description,
-                    languageID: formData.languageID,
-                    code: formData.code,
-                    status: formData.status,
-                    categories: formData.categories,
-                    tags: formData.tags,
-                    userID: userID
-                },
-                success: function (response) {
-
-                    if (response.snippetID == null) {
-                        alert('При створенні сніпета виникла помилка!')
-                        return
-                    }
-
-                    const snippetId = response.snippetID;
-                    alert(`Сніпет успішно додано! ID: ${snippetId}`);
-                    // Можливо, можна зробити додаткові дії, наприклад, перенаправлення або очищення форми
-                }
-            })
-        } catch (error) {
-            console.error('Помилка при відправці даних:', error);
-            alert('Сталася помилка при відправленні запиту.');
         }
     }
 });
