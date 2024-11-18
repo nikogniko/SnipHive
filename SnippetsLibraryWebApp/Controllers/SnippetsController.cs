@@ -35,7 +35,24 @@ namespace SnippetsLibraryWebApp.Controllers
         public async Task<IActionResult> AllSnippets()
         {
             var snippets = await _snippetsRepository.GetAllPublicSnippetsAsync();
+            ViewBag.PageType = nameof(AllSnippets);
             return View(snippets);
+        }
+
+        // Дія для перегляду деталей сніпета
+        [AllowAnonymous] // Дозволяє анонімний доступ до деталей, якщо сніпети публічні
+        [HttpGet]
+        [Route("Snippets/Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var snippet = await _snippetsRepository.GetSnippetByIdAsync(id);
+            if (snippet == null)
+            {
+                return NotFound();
+            }
+
+            // Припустимо, що Tags та Categories вже завантажені в snippet
+            return View(snippet);
         }
 
         // Дія для відображення обраних сніпетів користувача
@@ -54,6 +71,7 @@ namespace SnippetsLibraryWebApp.Controllers
             {
                 return PartialView("_SnippetList", favoriteSnippets);
             }
+            ViewBag.PageType = nameof(FavoriteSnippets);
             return View(favoriteSnippets);
         }
 
@@ -73,6 +91,7 @@ namespace SnippetsLibraryWebApp.Controllers
             {
                 return PartialView("_SnippetList", userSnippets);
             }
+            ViewBag.PageType = nameof(MySnippets);
             return View(userSnippets);
         }
 
@@ -158,17 +177,6 @@ namespace SnippetsLibraryWebApp.Controllers
                 Console.WriteLine($"Error while adding snippet: {ex.Message}");
                 return StatusCode(500, "An error occurred while adding the snippet.");
             }
-        }
-
-        // Детальна сторінка сніпета
-        public async Task<IActionResult> Details(int id)
-        {
-            var snippet = await _snippetsRepository.GetSnippetByIdAsync(id);
-            if (snippet == null)
-            {
-                return NotFound();
-            }
-            return View(snippet);
         }
     }
 }

@@ -68,21 +68,22 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT Snippet.ID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, Code, Status, 
+                    SELECT Snippet.ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, Code, Status, 
                     COUNT(SavedSnippets.UserID) AS SavesCount
                     FROM Snippet
                     LEFT JOIN SavedSnippets ON SavedSnippets.SnippetID = Snippet.ID
-                    WHERE SnippetID = @CurrentSnippetID
-                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, Code, Status;
+                    WHERE Snippet.ID = @CurrentSnippetID
+                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, Code, Status;
                 ";
 
-                var snippet = await connection.QuerySingleOrDefaultAsync<SnippetModel>(query, new { SnippetID = snippetId });
+                var snippet = await connection.QuerySingleOrDefaultAsync<SnippetModel>(query, new { CurrentSnippetID = snippetId });
 
                 if (snippet != null)
                 {
                     // Завантаження категорій і тегів для сніпета
                     snippet.Categories = await _categoryRepository.GetCategoriesBySnippetIdAsync(snippet.ID);
                     snippet.Tags = await _tagRepository.GetTagsBySnippetIdAsync(snippet.ID);
+                    snippet.Code = Base64Helper.Base64Decode(snippet.Code);
                 }
 
                 return snippet;
@@ -110,42 +111,6 @@ namespace SnippetsLibraryWebApp.Repository
                 return rowsAffected > 0;
             }
         }
-
-        /*public async Task<bool> UpdateSnippetAsync(SnippetModel snippet, int userId)
-        {
-            // Перевіряємо, чи є користувач автором сніпета
-            var isAuthor = await IsUserAuthorOfSnippetAsync(snippet.ID, userId);
-            if (!isAuthor)
-            {
-                return false; // Якщо користувач не є автором, редагування неможливе
-            }
-
-            string connectionString = ConfigurationHelper.GetConnectionString();
-            using (var connection = new SqlConnection(connectionString))
-            {
-                string sql = @"
-                    UPDATE Snippet
-                    SET Title = @Title,
-                        Description = @Description,
-                        ProgrammingLanguageID = @ProgrammingLanguageID,
-                        Code = @Code,
-                        Status = @Status
-                    WHERE ID = @SnippetID;
-                ";
-
-                var rowsAffected = await connection.ExecuteAsync(sql, new
-                {
-                    snippet.Title,
-                    snippet.Description,
-                    snippet.ProgrammingLanguageID,
-                    snippet.Code,
-                    snippet.Status,
-                    SnippetID = snippet.ID
-                });
-
-                return rowsAffected > 0;
-            }
-        }*/
 
         public async Task<bool> UpdateSnippetAsync(SnippetModel snippet, int userId)
         {
@@ -303,12 +268,12 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT Snippet.ID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, Code, Status,
+                    SELECT Snippet.ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, Code, Status,
                     COUNT(SavedSnippets.UserID) AS SavesCount
                     FROM Snippet
                     LEFT JOIN SavedSnippets ON SavedSnippets.SnippetID = Snippet.ID
-                    WHERE AuthorID = @CurrentUserID
-                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, Code, Status;
+                    WHERE Snippet.AuthorID = @CurrentUserID
+                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, Code, Status;
                 ";
 
                 var userSnippets = await connection.QueryAsync<SnippetModel>(query, new { CurrentUserID = userId });
@@ -328,12 +293,12 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT Snippet.ID AS SnippetID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, 
+                    SELECT Snippet.ID AS SnippetID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, 
                            Code, Status, COUNT(SavedSnippets.UserID) AS SavesCount
                     FROM SavedSnippets
                     LEFT JOIN Snippet ON Snippet.ID = SavedSnippets.SnippetID
                     WHERE SavedSnippets.UserID = @CurrentUserID
-                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, AuthorID, CreatedAt, UpdatedAt, 
+                    GROUP BY Snippet.ID, Title, Description, ProgrammingLanguageID, Snippet.AuthorID, CreatedAt, UpdatedAt, 
                              Code, Status;
                 ";
 

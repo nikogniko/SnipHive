@@ -712,3 +712,20 @@ input[type="radio"]:checked + .toggle-label {
     transform: scale(0.95);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+/* Стилізація плашок тегів та категорій */
+.snippet-tags .badge,
+.snippet-categories .badge {
+    font-size: 0.8rem;
+    padding: 0.3em 0.6em;
+}
+
+/* Стилізація кнопки "Деталі" */
+.details-btn {
+    margin-top: 0.5em;
+}
+
+.snippet-tag, .snippet-category {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}

@@ -1,60 +1,171 @@
-﻿<!-- Views/Snippets/Details.cshtml -->
-@model SnippetsLibraryWebApp.Models.SnippetModel
+﻿@model SnippetsLibraryWebApp.Models.SnippetModel
 @using SnippetsLibraryWebApp.Repository
-@inject ProgrammingLanguageRepository _programmingLanguageRepository;
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
+@inject UserRepository _userRepository
+@inject CategoryRepository _categoryRepository
+@inject TagRepository _tagRepository
+
 @{
     ViewData["Title"] = "Деталі сніпета";
 }
 
-<div class="snippet-details">
-    <h2 class="snippet-title">@Model.Title</h2>
-    <div class="snippet-meta">
-        <span class="snippet-language">@await GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
-        <span class="snippet-saves">
-            <i class="fas fa-star"></i> @Model.SavesCount
-        </span>
-    </div>
-    <div class="snippet-info">
-        <span class="snippet-author">Автор: @GetAuthorName(Model.AuthorID)</span>
-    </div>
-    <div class="snippet-updated">
-        Оновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy 'о' HH:mm")
-    </div>
-    <div class="snippet-tags">
-        @foreach (var tag in Model.Tags)
-        {
-            <span class="snippet-tag">@tag.Name</span>
-        }
-    </div>
-    <div class="snippet-categories">
-        <strong>Категорії:</strong>
-        @foreach (var category in Model.Categories)
-        {
-            <span class="snippet-category">@category.Name</span>
-        }
-    </div>
-    <div class="snippet-code">
-        <pre>@Model.Code</pre>
-    </div>
-    <div class="snippet-description-full">
-        <p>@Model.Description</p>
+<div class="page-container">
+    <h1 class="page-title">Перегляд інформації про сніпет</h1>
+    <div class="form-sections-container">
+        <!-- Перша частина з деталями сніпета -->
+        <div class="form-details-section">
+            <form asp-action="Details" method="get">
+                <div class="form-group">
+                    <label for="Title">Назва</label>
+                    <label type="text" class="form-control" name="Title">@Model.Title</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="ProgrammingLanguageID">Мова програмування</label>
+                    <span class="selected-category">@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Статус</label>
+                    <div class="status-toggle-group">
+                        <span class="selected-category">@string.Join("", Model.Status.Substring(0, 1).ToUpper(), Model.Status.Substring(1).ToLower())</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Description">Опис</label>
+                    <label class="form-control" name="Description">@Model.Description</label>
+                </div>
+
+                <div class="form-group category-select-container">
+                    <label for="Categories">Категорії</label>
+                    <div class="selected-list">
+                        @foreach (var category in await _categoryRepository.GetCategoriesBySnippetIdAsync(Model.ID))
+                        {
+                            <span class="selected-category" data-id="@category.ID">@category.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group tag-select-container">
+                    <label for="Tags">Теги</label>
+                    <div class="selected-list">
+                        @foreach (var tag in await _tagRepository.GetTagsBySnippetIdAsync(Model.ID))
+                        {
+                            <span class="selected-tag" data-id="@tag.ID">@tag.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group form-buttons">
+                    <a href="@Url.Action("AllSnippets", "Snippets")" class="btn secondary-btn">Повернутися до списку</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Друга частина з блоком коду -->
+        <div class="form-code-section">
+            <div class="form-group">
+                <label for="ViewCode">Код</label>
+                <div class="code-editor-container">
+                    <textarea id="ViewCode" name="ViewCode" class="CodeMirror" style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-@functions {
-    // Метод для отримання назви мови програмування за її ID
-    public async Task<string> GetProgrammingLanguageName(int id)
-    {
-        // Реалізуйте логіку для отримання назви мови програмування
-        var languages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
+<!-- Підключення CodeMirror JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+<!-- CodeMirror Основний CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<!-- Мови CodeMirror (наприклад, JavaScript, Python, тощо) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/swift/swift.min.js"></script>
+<!-- Додаткові плагіни CodeMirror (опціонально) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
 
-        return languages.Any(x => x.ID == id) ? languages.Where(x => x.ID == id).FirstOrDefault().Name : "Unknown";
-    }
+<!-- Теми CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+<!-- Ініціалізація CodeMirror -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var codeTextarea = document.getElementById("ViewCode");
+        var language = "@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)";
 
-    // Метод для отримання імені автора за його ID
-    public string GetAuthorName(int authorId)
-    {
-        // Реалізуйте логіку для отримання імені автора
-        return $"Користувач {authorId}";
-    }
-}
+        debugger;
+
+        const modeMap = {
+            bash: "shell",
+            c: "text/x-csrc", // Режим для C
+            csharp: "text/x-csharp", // Режим для C#
+            cpp: "text/x-c++src", // Режим для C++
+            css: "css",
+            dart: "dart",
+            elixir: "plaintext",
+            erlang: "plaintext",
+            fsharp: "plaintext",
+            go: "go",
+            groovy: "plaintext",
+            haskell: "plaintext",
+            html: "htmlmixed",
+            java: "text/x-java", // Режим для Java
+            javascript: "javascript",
+            json: "application/json",
+            julia: "plaintext",
+            kotlin: "plaintext",
+            lua: "lua",
+            matlab: "plaintext",
+            objectivec: "text/x-objectivec", // Режим для Objective-C
+            other: "plaintext",
+            perl: "perl",
+            php: "php",
+            plsql: "sql",
+            powershell: "plaintext",
+            python: "python",
+            r: "plaintext",
+            ruby: "ruby",
+            rust: "rust",
+            scala: "plaintext",
+            shell: "shell",
+            sql: "sql",
+            swift: "swift",
+            tsql: "sql",
+            typescript: "javascript",
+            vbnet: "plaintext",
+            xml: "xml",
+            yaml: "yaml",
+        };
+
+        language = language == "C#" ? "csharp" :
+            language == "C++" ? "cpp" :
+                language == "F#" ? "fsharp" :
+                    language == "VB.NET" ? "vbnet" :
+                        language == "PL/SQL" ? "plsql" :
+                            language == "Objective-C" ? "objectivec" :
+                                language == "T-SQL" ? "tsql" :
+                                    language == "Visual Basic" ? "vbnet" :
+                                        language == "Shell script" ? "shell" : language
+
+        var mode = modeMap[language.toString().toLowerCase()] || "plaintext"
+
+        var editor = CodeMirror.fromTextArea(codeTextarea, {
+            lineNumbers: true,
+            mode: mode,
+            theme: "monokai",
+            readOnly: true, // Робить редактор не редагованим
+            viewportMargin: Infinity // Розгортає редактор на весь контент
+        });
+    });
+</script>

@@ -17,6 +17,13 @@ $(document).ready(function () {
         loadSnippets('/Snippets/MySnippets');
     });
 
+    // Обробка кліку на кнопку "Деталі"
+    $(document).on('click', '.details-btn', function (e) {
+        e.preventDefault();
+        var snippetId = $(this).data('id');
+        window.location.href = '/Snippets/Details/' + snippetId;
+    });
+
     // Функція для завантаження сніпетів через AJAX
     window.loadSnippets = function (url) { // Експортуємо функцію до глобального об'єкта
         $.ajax({
