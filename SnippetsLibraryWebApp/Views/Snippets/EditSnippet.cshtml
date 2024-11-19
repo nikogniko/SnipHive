@@ -93,8 +93,8 @@
                 <!-- Додавання Нових Тегів -->
                 <div class="form-group">
                     <div class="add-tag-container">
-                        <input type="text" class="form-control" id="addTag" name="addTag" placeholder="Додайте власний тег за потреби..." />
-                        <button type="button" id="addTagBtn" class="btn secondary-btn">Додати</button>
+                        <input type="text" class="form-control add-tag-field" id="addTag" name="addTag" placeholder="Додайте власний тег за потреби..." />
+                        <button type="button" id="addTagBtn" class="secondary-btn">Додати</button>
                     </div>
                 </div>
 
@@ -109,16 +109,19 @@
                 var userID = '@int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)';
                 var languageName = '@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)';
             </script>
+        </div>
 
-            <!-- Друга частина з блоком коду -->
-            <div class="form-code-section">
-                <div class="form-group">
-                    <label for="Code">Код <span class="required">*</span></label>
-                    <div class="code-editor-container">
-                        <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
-                    </div>
+        <!-- Друга частина з блоком коду -->
+        <div class="form-code-section">
+            <div class="form-group">
+                <label for="Code">Код <span class="required">*</span></label>
+                <div class="code-editor-container">
+                    <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
                 </div>
             </div>
         </div>
+
     </div>
+
+
 </div>

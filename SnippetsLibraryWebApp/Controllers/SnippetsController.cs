@@ -111,6 +111,7 @@ namespace SnippetsLibraryWebApp.Controllers
         // Метод для видалення сніпета (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Route("/Snippets/DeleteSnippet")]
         public async Task<IActionResult> DeleteSnippet(int ID)
         {
             var snippet = await _snippetsRepository.GetSnippetByIdAsync(ID);
