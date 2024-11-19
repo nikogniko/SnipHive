@@ -337,10 +337,12 @@ form-group {
     }
 }
 
-
+.snippetss-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
 /* СТОРІНКА ДОДАВАННЯ НОВОГО СНІПЕТА */
-
 /* Основні стилі сторінки */
 body .container {
     max-width: 1300px;
@@ -611,7 +613,6 @@ input[type="radio"]:checked + .toggle-label {
     cursor: pointer;
     transition: box-shadow 0.3s ease;
     position: relative;
-    width: 80%;
 }
 
     .snippet-card:hover {
@@ -807,10 +808,13 @@ input[type="radio"]:checked + .toggle-label {
 
 /* Стилі для панелі фільтрації */
 .filter-form {
+    display: none;
     background-color: #f9f9f9;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
+    border-bottom: 3px solid var(--primary-accent-color);
+    border-top: 3px solid var(--primary-accent-color);
 }
 
 .filter-group {
@@ -878,3 +882,33 @@ input[type="radio"]:checked + .toggle-label {
         margin-bottom: 5px;
         font-weight: bold;
     }
+
+.snip-page-title-block{
+    display: flex;
+    justify-content: space-between;
+}
+
+.filter-button {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .filter-button::before {
+        content: "\1F52E"; /* Символ Unicode для піктограми (лупа) - 1F50D */
+        /*        margin-right: 8px;*/
+    }
+
+    .filter-button:hover {
+        background-color: var(--secondary-accent-color);
+    }
+
+.btn {
+    margin-top: 22px;
+}

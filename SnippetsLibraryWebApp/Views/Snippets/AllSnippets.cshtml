@@ -3,14 +3,20 @@
 @{
     ViewData["Title"] = "Усі сніпети";
 }
-<h1>Усі сніпети</h1>
 
-<!-- Вказівка на поточну сторінку для JavaScript -->
-<div id="currentPage" data-page="AllSnippets"></div>
+<div class="snippetss-container">
+    <div class="snip-page-title-block">
+        <h1>Усі сніпети</h1>
+        <button class="filter-button"></button>
+    </div>
 
-@await Html.PartialAsync("_FilterForm")
+    <!-- Вказівка на поточну сторінку для JavaScript -->
+    <div id="currentPage" data-page="AllSnippets"></div>
 
-<!-- Контейнер для сніпетів -->
-<div id="snippetsContent">
-    @await Html.PartialAsync("_SnippetList", Model)
+    @await Html.PartialAsync("_FilterForm")
+
+    <!-- Контейнер для сніпетів -->
+    <div id="snippetsContent">
+        @await Html.PartialAsync("_SnippetList", Model)
+    </div>
 </div>
