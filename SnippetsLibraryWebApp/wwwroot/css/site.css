@@ -115,7 +115,7 @@ a {
 
     .primary-btn:hover,
     .secondary-btn:hover,
-    .dark-btn:hover{
+    .dark-btn:hover {
         background-color: var(--primary-accent-color); /* Зміна на зелений фон при наведенні */
         border-color: var(--primary-accent-color); /* Світло-зелений бордер */
         color: #fff; /* Білий текст при наведенні */
@@ -337,10 +337,12 @@ form-group {
     }
 }
 
-
+.snippetss-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
 /* СТОРІНКА ДОДАВАННЯ НОВОГО СНІПЕТА */
-
 /* Основні стилі сторінки */
 body .container {
     max-width: 1300px;
@@ -408,10 +410,11 @@ body .container {
     overflow-y: hidden;
     resize: none;
 }
-.form-control.add-tag-field {
-    height: 100%;
-}
-    /* Стилі для випадаючого списку з пошуком */
+
+    .form-control.add-tag-field {
+        height: 100%;
+    }
+/* Стилі для випадаючого списку з пошуком */
 .select-search {
     width: 100%;
     padding: 10px;
@@ -458,6 +461,7 @@ input[type="radio"]:checked + .toggle-label {
     display: flex;
     justify-content: flex-start;
 }
+
     .form-buttons.edit-del-btn {
         justify-content: space-between;
     }
@@ -466,7 +470,7 @@ input[type="radio"]:checked + .toggle-label {
     gap: 10px;
 }
 
-.dark-btn{
+.dark-btn {
     background-color: #272822;
     color: #fff;
     border: 2px solid #272822;
@@ -611,7 +615,6 @@ input[type="radio"]:checked + .toggle-label {
     cursor: pointer;
     transition: box-shadow 0.3s ease;
     position: relative;
-    width: 80%;
 }
 
     .snippet-card:hover {
@@ -679,7 +682,7 @@ input[type="radio"]:checked + .toggle-label {
 
 .snippet-description {
     margin-top: 12px;
-/*  position: relative;*/
+    /*  position: relative;*/
     display: flex;
     gap: 10px;
 }
@@ -693,7 +696,6 @@ input[type="radio"]:checked + .toggle-label {
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        
         flex-grow: 7;
     }
 
@@ -716,7 +718,7 @@ input[type="radio"]:checked + .toggle-label {
 }
 
     .details-btn:hover {
-        background-color:  var(--dark-accent-color);
+        background-color: var(--dark-accent-color);
     }
 
 .snippet-extra {
@@ -807,10 +809,13 @@ input[type="radio"]:checked + .toggle-label {
 
 /* Стилі для панелі фільтрації */
 .filter-form {
+    display: none;
     background-color: #f9f9f9;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
+    border-bottom: 3px solid var(--primary-accent-color);
+    border-top: 3px solid var(--primary-accent-color);
 }
 
 .filter-group {
@@ -879,7 +884,7 @@ input[type="radio"]:checked + .toggle-label {
         font-weight: bold;
     }
 
-.snip-page-title-block{
+.snip-page-title-block {
     display: flex;
     justify-content: space-between;
 }
