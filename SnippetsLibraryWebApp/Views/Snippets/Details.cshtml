@@ -67,13 +67,14 @@
                     </div>
                 </div>
 
-                <div class="form-group form-buttons">
+@*                 <div class="form-group form-buttons">
                     <a href="@Url.Action("AllSnippets", "Snippets")" class="btn secondary-btn">Повернутися до списку</a>
                     @if(Model.AuthorID == Convert.ToInt32(userId))
                     {
                         <a href="/Snippets/EditSnippet/@Model.ID" class="btn secondary-btn">Редагувати</a>
+                        <button type="button" id="deleteSnippet" class="btn secondary-btn" data-snippet-id="@Model.ID">Видалити</button>
                     }
-                </div>
+                </div> *@
             </form>
         </div>
 
@@ -116,6 +117,17 @@
             </div>
         </div>
     </div>
+
+    <div class="form-buttons edit-del-btn">
+        <a href="@Url.Action("AllSnippets", "Snippets")" class="btn primary-btn">Повернутися до списку</a>
+        <div>
+            @if (Model.AuthorID == Convert.ToInt32(userId))
+            {
+                <a href="/Snippets/EditSnippet/@Model.ID" class="btn primary-btn">Редагувати</a>
+                <button type="button" id="deleteSnippet" class="btn dark-btn" data-snippet-id="@Model.ID">Видалити</button>
+            }
+        </div>
+    </div>
 </div>
 
 <!-- Підключення Font Awesome для іконок -->
@@ -148,8 +160,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         var codeTextarea = document.getElementById("ViewCode");
         var language = "@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)";
-
-        debugger;
 
         const modeMap = {
             bash: "shell",
@@ -248,5 +258,37 @@
                 }
             });
         });
+
+        $("#deleteSnippet").on("click", function () {
+            debugger;
+            var snippetId = this.getAttribute("data-snippet-id");
+
+            // Підтвердження перед видаленням
+            if (confirm("Ви впевнені, що хочете видалити цей сніпет?")) {
+                $.ajax({
+                    url: "/Snippets/DeleteSnippet",
+                    type: "POST",
+                    data: { ID: snippetId },
+                    // contentType: "application/json; charset=utf-8",
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() // CSRF-токен
+                    },
+                    success: function (response) {
+                        // Перенаправлення на сторінку зі списком всіх сніпетів після успішного видалення
+                        window.location.href = "/Snippets/AllSnippets";
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 403) {
+                            alert("Ви не маєте прав на видалення цього сніпета.");
+                        } else if (xhr.status === 404) {
+                            alert("Сніпет не знайдено.");
+                        } else {
+                            alert("Виникла помилка при спробі видалити сніпет.");
+                        }
+                    }
+                });
+            }
+        });
+
     });
 </script>
