@@ -8,21 +8,17 @@ namespace SnippetsLibraryWebApp.Repository
 {
     public class TagRepository
     {
-        public async Task<IEnumerable<TagModel>> GetAllTagsAsync()
+        public async Task<IEnumerable<TagModel>> SearchTagsAsync(string query = "", int amount = -1)
         {
-            try
+            var take = amount <= 0 ? "" : "TOP " + amount.ToString();
+
+            var sql = @$"SELECT {take} ID, Name 
+                FROM Tag 
+                WHERE Name LIKE @Query 
+                ORDER BY Name";
+            using (var connection = new SqlConnection(ConfigurationHelper.GetConnectionString()))
             {
-                string connectionString = ConfigurationHelper.GetConnectionString();
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    string query = "SELECT ID, Name FROM Tag";
-                    return await connection.QueryAsync<TagModel>(query);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error while getting all tags: " + ex.Message);
-                return null;
+                return await connection.QueryAsync<TagModel>(sql, new { Query = $"%{query}%" });
             }
         }
 

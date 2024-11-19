@@ -34,7 +34,7 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             try
             {
-                var tags = await _tagRepository.GetAllTagsAsync();
+                var tags = await _tagRepository.SearchTagsAsync();
 
                 return Ok(tags);
             }

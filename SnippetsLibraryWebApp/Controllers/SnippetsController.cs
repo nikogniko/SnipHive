@@ -20,18 +20,21 @@ namespace SnippetsLibraryWebApp.Controllers
         private readonly TagRepository _tagRepository;
         private readonly CategoryRepository _categoryRepository;
         private readonly ProgrammingLanguageRepository _programmingLanguageRepository;
+        private readonly UserRepository _userRepository;
 
 
         public SnippetsController(
             SnippetRepository snippetRepository, 
             TagRepository tagRepository, 
             CategoryRepository categoryRepository, 
-            ProgrammingLanguageRepository programmingLanguageRepository)
+            ProgrammingLanguageRepository programmingLanguageRepository,
+            UserRepository userRepository)
         {
             _snippetsRepository = snippetRepository;
             _tagRepository = tagRepository;
             _categoryRepository = categoryRepository;
             _programmingLanguageRepository = programmingLanguageRepository;
+            _userRepository = userRepository;
         }
 
         // Дія для відкриття сторінки додавання сніпета
@@ -41,12 +44,49 @@ namespace SnippetsLibraryWebApp.Controllers
             return View("~/Views/AddSnippet/AddSnippet.cshtml");
         }
 
-        // Сторінка "Усі сніпети"
+        // Метод для пошуку авторів
+        [HttpGet]
+        [Route("Snippets/SearchAuthors")]
         [AllowAnonymous]
-        public async Task<IActionResult> AllSnippets()
+        public async Task<IActionResult> SearchAuthors(string query)
         {
-            var snippets = await _snippetsRepository.GetAllPublicSnippetsAsync();
+            var authors = await _userRepository.GetAllAuthors(query);
+            return Json(authors);
+        }
+
+        [HttpGet]
+        [Route("Snippets/SearchTags")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SearchTags(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Query cannot be empty.");
+            }
+
+            var tags = await _tagRepository.SearchTagsAsync(query);
+            return Json(tags);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> AllSnippets(int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
+        {
+            var snippets = await _snippetsRepository.GetFilteredSnippetsAsync(authorIds, categoryIds, tagIds, languageIds, sortOrder);
+
+            // Передача всіх категорій та мов програмування для випадаючих списків
+            var allCategories = await _categoryRepository.GetAllCategoriesAsync();
+            var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
+
+            ViewBag.Categories = allCategories;
+            ViewBag.ProgrammingLanguages = allLanguages;
+
             ViewBag.PageType = nameof(AllSnippets);
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_SnippetList", snippets);
+            }
+
             return View(snippets);
         }
 
@@ -126,7 +166,7 @@ namespace SnippetsLibraryWebApp.Controllers
                     Text = c.Name,
                     Selected = snippet.Categories.Any(sc => sc.ID == c.ID)
                 }).ToList(),
-                AllTags = (await _tagRepository.GetAllTagsAsync()).Select(t => new SelectListItem
+                AllTags = (await _tagRepository.SearchTagsAsync()).Select(t => new SelectListItem
                 {
                     Value = t.ID.ToString(),
                     Text = t.Name,
@@ -260,7 +300,8 @@ namespace SnippetsLibraryWebApp.Controllers
         // Дія для відображення обраних сніпетів користувача
         [HttpGet]
         [Route("Snippets/FavoriteSnippets")]
-        public async Task<IActionResult> FavoriteSnippets()
+        [AllowAnonymous]
+        public async Task<IActionResult> FavoriteSnippets(int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -268,19 +309,29 @@ namespace SnippetsLibraryWebApp.Controllers
             }
 
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var favoriteSnippets = await _snippetsRepository.GetSavedSnippetsByUserAsync(userId);
+            var snippets = await _snippetsRepository.GetFavoriteSnippetsAsync(userId, authorIds, categoryIds, tagIds, languageIds, sortOrder);
+
+            // Передача всіх категорій та мов програмування для випадаючих списків
+            var allCategories = await _categoryRepository.GetAllCategoriesAsync();
+            var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
+
+            ViewBag.Categories = allCategories;
+            ViewBag.ProgrammingLanguages = allLanguages;
+
+            ViewBag.PageType = nameof(FavoriteSnippets);
+
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_SnippetList", favoriteSnippets);
+                return PartialView("_SnippetList", snippets);
             }
-            ViewBag.PageType = nameof(FavoriteSnippets);
-            return View(favoriteSnippets);
+
+            return View(snippets);
         }
 
         // Дія для відображення авторських сніпетів користувача
         [HttpGet]
         [Route("Snippets/MySnippets")]
-        public async Task<IActionResult> MySnippets()
+        public async Task<IActionResult> MySnippets(int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -288,13 +339,23 @@ namespace SnippetsLibraryWebApp.Controllers
             }
 
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var userSnippets = await _snippetsRepository.GetUserSnippetsAsync(userId);
+            var snippets = await _snippetsRepository.GetMySnippetsAsync(userId, authorIds, categoryIds, tagIds, languageIds, sortOrder);
+
+            // Передача всіх категорій та мов програмування для випадаючих списків
+            var allCategories = await _categoryRepository.GetAllCategoriesAsync();
+            var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
+
+            ViewBag.Categories = allCategories;
+            ViewBag.ProgrammingLanguages = allLanguages;
+
+            ViewBag.PageType = nameof(MySnippets);
+
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_SnippetList", userSnippets);
+                return PartialView("_SnippetList", snippets);
             }
-            ViewBag.PageType = nameof(MySnippets);
-            return View(userSnippets);
+
+            return View(snippets);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

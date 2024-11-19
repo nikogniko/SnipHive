@@ -16,32 +16,3 @@
         }
     }
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Обробка кліку на блок сніпета для розгортання/згортання додаткової інформації
-            $('.snippet-card').on('click', function (e) {
-                // Перевіряємо, чи клікували на кнопку "Деталі"
-                if ($(e.target).hasClass('details-btn')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                var extra = $(this).find('.snippet-extra');
-                extra.slideToggle(300);
-            });
-
-            // Обробка кліку на кнопку "Деталі" для переходу на сторінку з деталями
-            $('.details-btn').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                var snippetCard = $(this).closest('.snippet-card');
-                var snippetId = snippetCard.closest('[data-id]').data('id');
-                // Перенаправлення на сторінку деталей сніпета
-                window.location.href = '/Snippets/Details/' + snippetId;
-            });
-        });
-    </script>
-}

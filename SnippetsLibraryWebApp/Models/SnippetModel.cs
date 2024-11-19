@@ -40,6 +40,5 @@
 
         // Список тегів
         public IEnumerable<TagModel> Tags { get; set; } = new List<TagModel>();
-
     }
 }

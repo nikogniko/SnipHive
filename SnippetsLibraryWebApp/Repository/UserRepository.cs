@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Data.SqlClient;
 using SnippetsLibraryWebApp.Models;
 using SnippetsLibraryWebApp.Utils;
@@ -8,6 +9,34 @@ namespace SnippetsLibraryWebApp.Repository
 {
     public class UserRepository
     {
+        public async Task<IEnumerable<AuthorModel>> GetAllAuthors(string filterTerm = "")
+        {
+            string connectionString = ConfigurationHelper.GetConnectionString();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = @"
+                SELECT 
+                    [User].ID as Id, 
+                    [User].Username, 
+                    COUNT(Snippet.ID) AS SnippetCount
+                FROM 
+                    [User]
+                JOIN 
+                    Snippet ON [User].ID = Snippet.AuthorID
+                GROUP BY 
+                    [User].ID, 
+                    [User].Username
+                HAVING 
+                    COUNT(Snippet.ID) > 0 AND [User].Username LIKE @FilterTerm
+                "
+                ;
+                
+                var authors = await connection.QueryAsync<AuthorModel>(query, new { FilterTerm = $"%{filterTerm}%" });
+
+                return authors;
+            }
+        }
+
         public async Task<string> GetUsernameByIdAsync(int userId)
         {
             try

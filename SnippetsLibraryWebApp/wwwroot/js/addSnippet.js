@@ -200,15 +200,103 @@ document.addEventListener('DOMContentLoaded', function () {
         form.find('#addTagBtn').on('click', function () {
             var newTag = form.find('#addTag').val().trim();
             if (newTag) {
-                // Додайте логіку для додавання тегів
-                // Наприклад, додавання нового чекбоксу
-                var newTagId = Date.now(); // Тимчасовий ID, замініть на реальний, якщо потрібно
-                var checkbox = $('<label class="checkbox-label"><input type="checkbox" class="tag-checkbox" name="tags" value="' + newTagId + '" checked /> ' + newTag + '</label>');
-                form.find('.dropdown-content').first().append(checkbox);
-                form.find('#addTag').val('');
-                // Оновіть відображення вибраних тегів
+                // Відправляємо POST-запит на сервер для додавання тега
+                $.ajax({
+                    url: '/Tags/AddTag',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        tagName: newTag
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Тег додано успішно!');
+                            loadTags();
+                        } else {
+                            alert('Не вдалося додати тег. Спробуйте ще раз.');
+                        }
+                    }
+                })
             }
         });
+    }
+
+    function loadTags() {
+        // Отримання поточних вибраних тегів з DOM
+        let selectedTagIds = [];
+        $('#selectedTags .selected-tag').each(function () {
+            selectedTagIds.push(parseInt($(this).data('id')));
+        });
+
+        $.ajax({
+            url: '/Tags/GetAllTags', // Шлях до вашого ендпойнту
+            type: 'GET',
+            dataType: 'json',
+            success: function (tags) {
+                // Очищаємо поточний список тегів
+                $('#dropdownTagList').empty();
+
+                // Додаємо отримані теги до дропдауну з відміткою вибраних
+                tags.forEach(function (tag) {
+                    const isChecked = selectedTagIds.includes(tag.id) ? 'checked' : '';
+                    const checkboxLabel = `
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="tag-checkbox" value="${tag.id}" ${isChecked} />
+                            ${tag.name}
+                        </label>
+                    `;
+                    $('#dropdownTagList').append(checkboxLabel);
+                });
+
+                // Оновлюємо відображення вибраних тегів
+                updateSelectedTagsDisplay();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading tags:', error);
+                alert('Сталася помилка при завантаженні тегів.');
+            }
+        });
+    }
+
+    function updateSelectedTagsDisplay() {
+        // Функція для оновлення відображення вибраних тегів після перезавантаження списку
+        const selectedTags = [];
+
+        $('.tag-checkbox:checked').each(function () {
+            selectedTags.push({
+                id: parseInt($(this).val()),
+                name: $(this).closest('label').text().trim()
+            });
+        });
+
+        const selectedList = $('#selectedTags');
+        selectedList.empty();
+
+        selectedTags.forEach(function (tag) {
+            const tagSpan = $('<span>', {
+                class: 'selected-tag',
+                'data-id': tag.id,
+                text: tag.name
+            });
+
+            const removeBtn = $('<span>', {
+                class: 'remove-tag',
+                text: ' ×',
+                'aria-label': `Remove ${tag.name}`,
+                role: 'button',
+                tabindex: '0'
+            });
+
+            tagSpan.append(removeBtn);
+            selectedList.append(tagSpan);
+        });
+
+        // Оновлення плейсхолдера випадайки
+        if (selectedTags.length > 0) {
+            $('#tagsFilter .dropdown-placeholder').text(`${selectedTags.length} обрано`);
+        } else {
+            $('#tagsFilter .dropdown-placeholder').text(`--Оберіть теги--`);
+        }
     }
 
     function initializeDropdown(dropdownSelector, checkboxSelector, selectedListSelector, maxSelection, type, hasRemoveButton) {
@@ -233,8 +321,8 @@ document.addEventListener('DOMContentLoaded', function () {
             e.stopPropagation();
         });
 
-        // Обробка змін у чекбоксах
-        $(checkboxSelector).on('change', function () {
+        // Делегування події зміни для чекбоксів
+        dropdownList.on('change', checkboxSelector, function () {
             updateSelectedItems();
         });
 
@@ -289,8 +377,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Делегування події кліку для видалення категорій
-        if (hasRemoveButton && type === 'category') {
+        // Делегування події кліку для видалення категорій/тегів
+        if (hasRemoveButton) {
             selectedList.on('click', `.remove-${type}`, function () {
                 const itemTag = $(this).parent(`.selected-${type}`);
                 const itemId = itemTag.data('id');
@@ -310,37 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // Обробка клавіатурних подій для видалення категорій
-            selectedList.on('keydown', `.remove-${type}`, function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    $(this).click();
-                }
-            });
-        }
-
-        // Делегування події кліку для видалення тегів
-        if (hasRemoveButton && type === 'tag') {
-            selectedList.on('click', `.remove-${type}`, function () {
-                const itemTag = $(this).parent(`.selected-${type}`);
-                const itemId = itemTag.data('id');
-
-                // Відмічаємо відповідний чекбокс
-                $(`${checkboxSelector}[value="${itemId}"]`).prop('checked', false);
-
-                // Видаляємо тег з відображення
-                itemTag.remove();
-
-                // Оновлення плейсхолдера випадайки
-                const selectedCount = $(checkboxSelector + ':checked').length;
-                if (selectedCount > 0) {
-                    dropdown.find('.dropdown-placeholder').text(`${selectedCount} обрано`);
-                } else {
-                    dropdown.find('.dropdown-placeholder').text(`--Оберіть ${type === 'category' ? 'до 3-х категорій' : 'теги'}--`);
-                }
-            });
-
-            // Обробка клавіатурних подій для видалення тегів
+            // Обробка клавіатурних подій для видалення категорій/тегів
             selectedList.on('keydown', `.remove-${type}`, function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();

@@ -3,7 +3,14 @@
 @{
     ViewData["Title"] = "Мої сніпети";
 }
-
 <h1>Мої сніпети</h1>
 
-@await Html.PartialAsync("_SnippetList", Model)
+<!-- Вказівка на поточну сторінку для JavaScript -->
+<div id="currentPage" data-page="MySnippets"></div>
+
+@await Html.PartialAsync("_FilterForm")
+
+<!-- Контейнер для сніпетів -->
+<div id="snippetsContent">
+    @await Html.PartialAsync("_SnippetList", Model)
+</div>

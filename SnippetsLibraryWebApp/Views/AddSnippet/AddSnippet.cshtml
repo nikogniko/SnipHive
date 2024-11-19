@@ -69,7 +69,7 @@
                     <div id="tagDropdown" class="custom-dropdown">
                         <span class="dropdown-placeholder">--Оберіть теги--</span>
                         <div id="dropdownTagList" class="dropdown-content">
-                            @foreach (var tag in await _tagRepository.GetAllTagsAsync())
+                            @foreach (var tag in await _tagRepository.SearchTagsAsync())
                             {
                                 <label class="checkbox-label">
                                     <input type="checkbox" class="tag-checkbox" value="@tag.ID" />
