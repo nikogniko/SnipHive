@@ -332,4 +332,8 @@
         // Перенаправлення на сторінку деталей сніпета
         window.open('/Snippets/Details/' + snippetId, '_blank');
     });
+
+    $('.filter-button').click(function () {
+        $('.filter-form').slideToggle();
+    });
 });

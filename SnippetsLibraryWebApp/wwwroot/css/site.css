@@ -547,6 +547,7 @@ input[type="radio"]:checked + .toggle-label {
     margin-bottom: 5px;
 }
 
+
 /* Remove Button (x) */
 .remove-category,
 .remove-tag {
@@ -877,6 +878,36 @@ input[type="radio"]:checked + .toggle-label {
         margin-bottom: 5px;
         font-weight: bold;
     }
+
+.snip-page-title-block{
+    display: flex;
+    justify-content: space-between;
+}
+
+.filter-button {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .filter-button::before {
+        content: "\1F52E"; /* Символ Unicode для піктограми (лупа) - 1F50D */
+        /*        margin-right: 8px;*/
+    }
+
+    .filter-button:hover {
+        background-color: var(--secondary-accent-color);
+    }
+
+.btn {
+    margin-top: 22px;
+}
 
 /* Плашки категорій */
 .badge-category {
