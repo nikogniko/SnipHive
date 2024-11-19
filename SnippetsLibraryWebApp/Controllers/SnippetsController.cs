@@ -74,9 +74,11 @@ namespace SnippetsLibraryWebApp.Controllers
             var snippets = await _snippetsRepository.GetFilteredSnippetsAsync(authorIds, categoryIds, tagIds, languageIds, sortOrder);
 
             // Передача всіх категорій та мов програмування для випадаючих списків
+            var allTags = await _tagRepository.SearchTagsAsync();
             var allCategories = await _categoryRepository.GetAllCategoriesAsync();
             var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
 
+            ViewBag.Tags = allTags;
             ViewBag.Categories = allCategories;
             ViewBag.ProgrammingLanguages = allLanguages;
 
@@ -313,9 +315,11 @@ namespace SnippetsLibraryWebApp.Controllers
             var snippets = await _snippetsRepository.GetFavoriteSnippetsAsync(userId, authorIds, categoryIds, tagIds, languageIds, sortOrder);
 
             // Передача всіх категорій та мов програмування для випадаючих списків
+            var allTags = await _tagRepository.SearchTagsAsync();
             var allCategories = await _categoryRepository.GetAllCategoriesAsync();
             var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
 
+            ViewBag.Tags = allTags;
             ViewBag.Categories = allCategories;
             ViewBag.ProgrammingLanguages = allLanguages;
 
@@ -343,9 +347,11 @@ namespace SnippetsLibraryWebApp.Controllers
             var snippets = await _snippetsRepository.GetMySnippetsAsync(userId, authorIds, categoryIds, tagIds, languageIds, sortOrder);
 
             // Передача всіх категорій та мов програмування для випадаючих списків
+            var allTags = await _tagRepository.SearchTagsAsync();
             var allCategories = await _categoryRepository.GetAllCategoriesAsync();
             var allLanguages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
 
+            ViewBag.Tags = allTags;
             ViewBag.Categories = allCategories;
             ViewBag.ProgrammingLanguages = allLanguages;
 

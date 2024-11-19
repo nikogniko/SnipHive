@@ -1,78 +1,89 @@
-﻿<!-- Views/Snippets/_SnippetCard.cshtml -->
-@model SnippetsLibraryWebApp.Models.SnippetModel
+﻿@model SnippetsLibraryWebApp.Models.SnippetModel
 @using SnippetsLibraryWebApp.Repository
 @inject ProgrammingLanguageRepository _programmingLanguageRepository
 @inject UserRepository _userRepository
 
-<div class="snippet-card" tabindex="0">
-    <div class="snippet-header">
-        <h3 class="snippet-title">@Model.Title</h3>
-        <div class="snippet-meta">
-            <span class="snippet-language">@await GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
-            <span class="snippet-saves">
-                Збережень: 
-                <i class="fas fa-star"></i> @Model.SavesCount
-            </span>
+<!-- Views/Snippets/_SnippetCard.cshtml -->
+
+<div class="snippet-card card mb-3">
+    <div class="card-body">
+        <!-- Заголовок та Метаінформація -->
+        <div class="snippet-header">
+            <h3 class="snippet-title">@Model.Title</h3>
+            <div class="snippet-meta">
+                <span class="snippet-language">@await GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
+                <span class="snippet-saves">
+                    Збережень:
+                    <i class="fas fa-star"></i> @Model.SavesCount
+                </span>
+            </div>
         </div>
-    </div>
-    <div class="snippet-info">
-        @if (ViewBag.PageType != "MySnippets")
-        {
-            <span class="snippet-author">Автор: @await GetAuthorName(Model.AuthorID)</span>
-        }
-        else
-        {
-            <span class="snippet-status">Статус: @Model.Status.ToUpperInvariant()</span>
-        }
-    </div>
-    <div class="snippet-updated">
-        Оновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy 'о' HH:mm")
-    </div>
-    <!-- Плашки Категорій -->
-    @if (Model.Categories != null && Model.Categories.Any())
-    {
-        <div class="snippet-categories mb-2">
-            @foreach (var category in Model.Categories)
+
+        <!-- Інформація про Автора або Статус -->
+        <div class="snippet-info">
+            @if (ViewBag.PageType != "MySnippets")
             {
-                <span class="badge bg-primary me-1">@category.Name</span>
+                <span class="snippet-author">Автор: @await GetAuthorName(Model.AuthorID)</span>
+            }
+            else
+            {
+                <span class="snippet-status">Статус: @Model.Status.ToUpperInvariant()</span>
             }
         </div>
-    }
 
-    <!-- Плашки Тегів -->
-    @if (Model.Tags != null && Model.Tags.Any())
-    {
-        <div class="snippet-tags mb-2">
-            @foreach (var tag in Model.Tags)
-            {
-                <span class="badge bg-secondary me-1">@tag.Name</span>
-            }
+        <!-- Оновлено -->
+        <div class="snippet-updated">
+            Оновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy 'о' HH:mm")
         </div>
-    }
-    <div class="snippet-description">
-        <p>@TruncateDescription(Model.Description)</p>
-        <a href="/Snippets/Details/@Model.ID" target="_blank" class="btn btn-primary details-btn">Деталі</a>
-    </div>
 
-    <!-- Модальне Вікно для Видалення (Опціонально) -->
-    <div class="modal fade" id="deleteModal@Model.ID" tabindex="-1" aria-labelledby="deleteModalLabel@Model.ID" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form asp-action="DeleteSnippet" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="ID" value="@Model.ID" />
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel@Model.ID">Видалити сніпет</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Ви впевнені, що хочете видалити сніпет "<strong>@Model.Title</strong>"?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Скасувати</button>
-                        <button type="submit" class="btn btn-danger">Видалити</button>
-                    </div>
-                </form>
+        <!-- Плашки Категорій -->
+        @if (Model.Categories != null && Model.Categories.Any())
+        {
+            <div class="snippet-categories mb-2">
+                @foreach (var category in Model.Categories)
+                {
+                    <span class="badge badge-category me-1">@category.Name</span>
+                }
+            </div>
+        }
+
+        <!-- Плашки Тегів -->
+        @if (Model.Tags != null && Model.Tags.Any())
+        {
+            <div class="snippet-tags mb-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge badge-tag me-1">@tag.Name</span>
+                }
+            </div>
+        }
+
+        <!-- Опис Сніпета -->
+        <div class="snippet-description">
+            <p>@TruncateDescription(Model.Description)</p>
+            <a href="/Snippets/Details/@Model.ID" target="_blank" class="btn btn-primary details-btn">Деталі</a>
+        </div>
+
+        <!-- Модальне Вікно для Видалення (Опціонально) -->
+        <div class="modal fade" id="deleteModal@Model.ID" tabindex="-1" aria-labelledby="deleteModalLabel@Model.ID" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form asp-action="DeleteSnippet" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ID" value="@Model.ID" />
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel@Model.ID">Видалити сніпет</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Ви впевнені, що хочете видалити сніпет "<strong>@Model.Title</strong>"?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                            <button type="submit" class="btn btn-danger">Видалити</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -82,10 +93,8 @@
     // Метод для отримання назви мови програмування за її ID
     public async Task<string> GetProgrammingLanguageName(int id)
     {
-        // Реалізуйте логіку для отримання назви мови програмування
         var languages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
-
-        return languages.Any(x => x.ID == id) ? languages.Where(x => x.ID == id).FirstOrDefault().Name : "Unknown";
+        return languages.Any(x => x.ID == id) ? languages.First(x => x.ID == id).Name : "Unknown";
     }
 
     // Метод для отримання імені автора за його ID

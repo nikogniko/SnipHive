@@ -4,15 +4,18 @@
 }
 
 <div class="filter-form">
-    <!-- Фільтр за авторами -->
-    <div class="filter-item">
-        <label for="authorsFilter">Автори</label>
-        <div class="dropdown-container" id="authorsFilter">
-            <input type="text" id="authorSearch" class="form-control" placeholder="Пошук авторів..." autocomplete="off" />
-            <div class="dropdown-list" id="authorDropdown"></div>
+    @if (ViewBag.PageType != "MySnippets")
+    {
+        <!-- Фільтр за авторами -->
+        <div class="filter-item">
+            <label for="authorsFilter">Автори</label>
+            <div class="dropdown-container" id="authorsFilter">
+                <input type="text" id="authorSearch" class="form-control" placeholder="Пошук авторів..." autocomplete="off" />
+                <div class="dropdown-list" id="authorDropdown"></div>
+            </div>
+            <div class="selected-filters" id="selectedAuthors"></div>
         </div>
-        <div class="selected-filters" id="selectedAuthors"></div>
-    </div>
+    }
 
     <!-- Фільтр за категоріями -->
     <div class="filter-item">

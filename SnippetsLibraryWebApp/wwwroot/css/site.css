@@ -547,7 +547,6 @@ input[type="radio"]:checked + .toggle-label {
     margin-bottom: 5px;
 }
 
-
 /* Remove Button (x) */
 .remove-category,
 .remove-tag {
@@ -877,4 +876,41 @@ input[type="radio"]:checked + .toggle-label {
         display: block;
         margin-bottom: 5px;
         font-weight: bold;
+    }
+
+/* Плашки категорій */
+.badge-category {
+    display: inline-block;
+    padding: 2px 4px;
+    margin-right: 2px;
+    margin-top: 2px;
+    background-color: #e0f2e9;
+    color: #005500;
+    border: 1px solid #005500;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    font-size: 0.3em;
+    margin-bottom: 2px;
+}
+
+/* Плашки тегів */
+.badge-tag {
+    display: inline-block;
+    padding: 2px 4px;
+    margin-right: 2px;
+    margin-top: 2px;
+    background-color: #e0f2e9;
+    color: #63ae63;
+    border: 1px solid #005500;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    font-size: 0.3em;
+    margin-bottom: 2px;
+}
+
+    /* Відступи між плашками */
+    .badge-category.me-1, .badge-tag.me-1 {
+        margin-right: 0.25rem;
     }

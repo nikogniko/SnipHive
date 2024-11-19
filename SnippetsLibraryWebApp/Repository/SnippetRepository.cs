@@ -8,6 +8,8 @@ using SnippetsLibraryWebApp.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
+using Duende.IdentityServer.Validation;
+using NuGet.Protocol.Core.Types;
 
 namespace SnippetsLibraryWebApp.Repository
 {
@@ -38,6 +40,23 @@ namespace SnippetsLibraryWebApp.Repository
             }
         }
 
+        private async Task<IEnumerable<SnippetModel>> EnrichSnippetsWithTagsAndCategories(IEnumerable<SnippetModel> snippets)
+        {
+            foreach(var snippet in snippets)
+            {
+                if (snippet != null)
+                {
+                    var tags = await _tagRepository.GetTagsBySnippetIdAsync(snippet.ID);
+                    var categories = await _categoryRepository.GetCategoriesBySnippetIdAsync(snippet.ID);
+
+                    snippet.Tags = tags;
+                    snippet.Categories = categories;
+                }
+            }
+
+            return snippets;
+        }
+
         // Існуючий метод для отримання всіх сніпетів з фільтрами та сортуванням
         public async Task<IEnumerable<SnippetModel>> GetFilteredSnippetsAsync(int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
         {
@@ -49,7 +68,7 @@ namespace SnippetsLibraryWebApp.Repository
                         LEFT JOIN Category c ON sc.CategoryID = c.ID
                         LEFT JOIN SnippetTag st ON s.ID = st.SnippetID
                         LEFT JOIN Tag t ON st.TagID = t.ID
-                        WHERE 1=1");
+                        WHERE [Status] = 'public' AND 1=1");
 
             var parameters = new DynamicParameters();
 
@@ -109,10 +128,12 @@ namespace SnippetsLibraryWebApp.Repository
             {
                 sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
             }
+
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
             {
                 var snippets = await connection.QueryAsync<SnippetModel>(sql.ToString(), parameters);
+                snippets = await EnrichSnippetsWithTagsAndCategories(snippets);
                 return snippets;
             }
         }
@@ -191,6 +212,7 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 var snippets = await connection.QueryAsync<SnippetModel>(sql.ToString(), parameters);
+                snippets = await EnrichSnippetsWithTagsAndCategories(snippets);
                 return snippets;
             }
         }
@@ -215,14 +237,22 @@ namespace SnippetsLibraryWebApp.Repository
 
             if (categoryIds != null && categoryIds.Length > 0)
             {
-                sql.Append(" AND s.ID IN (SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds)");
+                // AND логіка для категорій
+                sql.Append(" AND s.ID IN (");
+                sql.Append("SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds ");
+                sql.Append($"GROUP BY SnippetID HAVING COUNT(DISTINCT CategoryID) = @CategoryCount)");
                 parameters.Add("CategoryIds", categoryIds);
+                parameters.Add("CategoryCount", categoryIds.Length);
             }
 
             if (tagIds != null && tagIds.Length > 0)
             {
-                sql.Append(" AND s.ID IN (SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds)");
+                // AND логіка для тегів
+                sql.Append(" AND s.ID IN (");
+                sql.Append("SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds ");
+                sql.Append($"GROUP BY SnippetID HAVING COUNT(DISTINCT TagID) = @TagCount)");
                 parameters.Add("TagIds", tagIds);
+                parameters.Add("TagCount", tagIds.Length);
             }
 
             if (languageIds != null && languageIds.Length > 0)
@@ -268,6 +298,7 @@ namespace SnippetsLibraryWebApp.Repository
             using (var connection = new SqlConnection(connectionString))
             {
                 var snippets = await connection.QueryAsync<SnippetModel>(sql.ToString(), parameters);
+                snippets = await EnrichSnippetsWithTagsAndCategories(snippets);
                 return snippets;
             }
         }

@@ -1,4 +1,5 @@
 ﻿$(document).ready(function () {
+
     // Отримання поточної сторінки
     let currentPage = $('#currentPage').data('page');
     let ajaxUrl = '';
