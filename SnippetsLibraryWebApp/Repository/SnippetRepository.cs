@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using Duende.IdentityServer.Validation;
 using NuGet.Protocol.Core.Types;
+using IdentityModel.Client;
 
 namespace SnippetsLibraryWebApp.Repository
 {
@@ -57,77 +58,34 @@ namespace SnippetsLibraryWebApp.Repository
             return snippets;
         }
 
-        // Існуючий метод для отримання всіх сніпетів з фільтрами та сортуванням
-        public async Task<IEnumerable<SnippetModel>> GetFilteredSnippetsAsync(int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
+        // Метод для отримання всіх сніпетів з фільтрами та сортуванням
+        public async Task<IEnumerable<SnippetModel>> GetFilteredSnippetsAsync(
+            int[] authorIds,
+            int[] categoryIds,
+            int[] tagIds,
+            int[] languageIds,
+            string sortOrder)
         {
             var sql = new StringBuilder();
             sql.Append(@"SELECT DISTINCT s.*,
-                        (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
-                        FROM Snippet s
-                        LEFT JOIN SnippetCategory sc ON s.ID = sc.SnippetID
-                        LEFT JOIN Category c ON sc.CategoryID = c.ID
-                        LEFT JOIN SnippetTag st ON s.ID = st.SnippetID
-                        LEFT JOIN Tag t ON st.TagID = t.ID
-                        WHERE [Status] = 'public' AND 1=1");
+                (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
+                FROM Snippet s
+                LEFT JOIN SnippetCategory sc ON s.ID = sc.SnippetID
+                LEFT JOIN Category c ON sc.CategoryID = c.ID
+                LEFT JOIN SnippetTag st ON s.ID = st.SnippetID
+                LEFT JOIN Tag t ON st.TagID = t.ID
+                WHERE [Status] = 'public' AND 1=1");
 
             var parameters = new DynamicParameters();
 
-            if (authorIds != null && authorIds.Length > 0)
-            {
-                sql.Append(" AND s.AuthorID IN @AuthorIds");
-                parameters.Add("AuthorIds", authorIds);
-            }
-
-            if (categoryIds != null && categoryIds.Length > 0)
-            {
-                sql.Append(" AND c.ID IN @CategoryIds");
-                parameters.Add("CategoryIds", categoryIds);
-            }
-
-            if (tagIds != null && tagIds.Length > 0)
-            {
-                sql.Append(" AND t.ID IN @TagIds");
-                parameters.Add("TagIds", tagIds);
-            }
-
-            if (languageIds != null && languageIds.Length > 0)
-            {
-                sql.Append(" AND s.ProgrammingLanguageID IN @LanguageIds");
-                parameters.Add("LanguageIds", languageIds);
-            }
+            // Фільтрація за автором, категоріями, тегами та мовою
+            AppendFilterIfNotEmpty(sql, parameters, "s.AuthorID", "AuthorIds", authorIds);
+            AppendFilterIfNotEmpty(sql, parameters, "c.ID", "CategoryIds", categoryIds);
+            AppendFilterIfNotEmpty(sql, parameters, "t.ID", "TagIds", tagIds);
+            AppendFilterIfNotEmpty(sql, parameters, "s.ProgrammingLanguageID", "LanguageIds", languageIds);
 
             // Додавання сортування
-            if (!string.IsNullOrEmpty(sortOrder))
-            {
-                switch (sortOrder)
-                {
-                    case "date_desc":
-                        sql.Append(" ORDER BY s.UpdatedAt DESC");
-                        break;
-                    case "date_asc":
-                        sql.Append(" ORDER BY s.UpdatedAt ASC");
-                        break;
-                    case "name_asc":
-                        sql.Append(" ORDER BY s.Title ASC");
-                        break;
-                    case "name_desc":
-                        sql.Append(" ORDER BY s.Title DESC");
-                        break;
-                    case "favorite_asc":
-                        sql.Append(" ORDER BY SavesCount ASC");
-                        break;
-                    case "favorite_desc":
-                        sql.Append(" ORDER BY SavesCount DESC");
-                        break;
-                    default:
-                        sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-                        break;
-                }
-            }
-            else
-            {
-                sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-            }
+            AppendSortOrder(sql, sortOrder);
 
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
@@ -139,74 +97,33 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         // Метод для отримання обраних сніпетів з фільтрами та сортуванням
-        public async Task<IEnumerable<SnippetModel>> GetFavoriteSnippetsAsync(int userId, int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
+        public async Task<IEnumerable<SnippetModel>> GetFavoriteSnippetsAsync(
+            int userId,
+            int[] authorIds,
+            int[] categoryIds,
+            int[] tagIds,
+            int[] languageIds,
+            string sortOrder)
         {
             var sql = new StringBuilder();
             sql.Append(@"SELECT DISTINCT s.*,
-                        (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
-                        FROM Snippet s
-                        INNER JOIN SavedSnippets ss ON s.ID = ss.SnippetID
-                        WHERE ss.UserID = @UserId");
+                (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
+                FROM Snippet s
+                INNER JOIN SavedSnippets ss ON s.ID = ss.SnippetID
+                WHERE ss.UserID = @UserId");
 
             var parameters = new DynamicParameters();
             parameters.Add("UserId", userId);
 
-            if (authorIds != null && authorIds.Length > 0)
-            {
-                sql.Append(" AND s.AuthorID IN @AuthorIds");
-                parameters.Add("AuthorIds", authorIds);
-            }
+            AppendFilterIfNotEmpty(sql, parameters, "s.AuthorID", "AuthorIds", authorIds);
 
-            if (categoryIds != null && categoryIds.Length > 0)
-            {
-                sql.Append(" AND s.ID IN (SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds)");
-                parameters.Add("CategoryIds", categoryIds);
-            }
+            // Для категорій та тегів використовуємо підзапити
+            AppendSubqueryFilter(sql, parameters, categoryIds, "CategoryIds", "s.ID IN (SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds)");
+            AppendSubqueryFilter(sql, parameters, tagIds, "TagIds", "s.ID IN (SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds)");
 
-            if (tagIds != null && tagIds.Length > 0)
-            {
-                sql.Append(" AND s.ID IN (SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds)");
-                parameters.Add("TagIds", tagIds);
-            }
+            AppendFilterIfNotEmpty(sql, parameters, "s.ProgrammingLanguageID", "LanguageIds", languageIds);
 
-            if (languageIds != null && languageIds.Length > 0)
-            {
-                sql.Append(" AND s.ProgrammingLanguageID IN @LanguageIds");
-                parameters.Add("LanguageIds", languageIds);
-            }
-
-            // Додавання сортування
-            if (!string.IsNullOrEmpty(sortOrder))
-            {
-                switch (sortOrder)
-                {
-                    case "date_desc":
-                        sql.Append(" ORDER BY s.UpdatedAt DESC");
-                        break;
-                    case "date_asc":
-                        sql.Append(" ORDER BY s.UpdatedAt ASC");
-                        break;
-                    case "name_asc":
-                        sql.Append(" ORDER BY s.Title ASC");
-                        break;
-                    case "name_desc":
-                        sql.Append(" ORDER BY s.Title DESC");
-                        break;
-                    case "favorite_asc":
-                        sql.Append(" ORDER BY SavesCount ASC");
-                        break;
-                    case "favorite_desc":
-                        sql.Append(" ORDER BY SavesCount DESC");
-                        break;
-                    default:
-                        sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-                        break;
-                }
-            }
-            else
-            {
-                sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-            }
+            AppendSortOrder(sql, sortOrder);
 
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
@@ -218,81 +135,28 @@ namespace SnippetsLibraryWebApp.Repository
         }
 
         // Метод для отримання авторських сніпетів з фільтрами та сортуванням
-        public async Task<IEnumerable<SnippetModel>> GetMySnippetsAsync(int userId, int[] authorIds, int[] categoryIds, int[] tagIds, int[] languageIds, string sortOrder)
+        public async Task<IEnumerable<SnippetModel>> GetMySnippetsAsync(
+            int userId,
+            int[] authorIds,
+            int[] categoryIds,
+            int[] tagIds,
+            int[] languageIds,
+            string sortOrder)
         {
             var sql = new StringBuilder();
             sql.Append(@"SELECT DISTINCT s.*,
-                        (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
-                        FROM Snippet s
-                        WHERE s.AuthorID = @UserId");
+                (SELECT COUNT(*) FROM SavedSnippets ss WHERE ss.SnippetID = s.ID) AS SavesCount
+                FROM Snippet s
+                WHERE s.AuthorID = @UserId");
 
             var parameters = new DynamicParameters();
             parameters.Add("UserId", userId);
 
-            if (authorIds != null && authorIds.Length > 0)
-            {
-                sql.Append(" AND s.AuthorID IN @AuthorIds");
-                parameters.Add("AuthorIds", authorIds);
-            }
-
-            if (categoryIds != null && categoryIds.Length > 0)
-            {
-                // AND логіка для категорій
-                sql.Append(" AND s.ID IN (");
-                sql.Append("SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds ");
-                sql.Append($"GROUP BY SnippetID HAVING COUNT(DISTINCT CategoryID) = @CategoryCount)");
-                parameters.Add("CategoryIds", categoryIds);
-                parameters.Add("CategoryCount", categoryIds.Length);
-            }
-
-            if (tagIds != null && tagIds.Length > 0)
-            {
-                // AND логіка для тегів
-                sql.Append(" AND s.ID IN (");
-                sql.Append("SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds ");
-                sql.Append($"GROUP BY SnippetID HAVING COUNT(DISTINCT TagID) = @TagCount)");
-                parameters.Add("TagIds", tagIds);
-                parameters.Add("TagCount", tagIds.Length);
-            }
-
-            if (languageIds != null && languageIds.Length > 0)
-            {
-                sql.Append(" AND s.ProgrammingLanguageID IN @LanguageIds");
-                parameters.Add("LanguageIds", languageIds);
-            }
-
-            // Додавання сортування
-            if (!string.IsNullOrEmpty(sortOrder))
-            {
-                switch (sortOrder)
-                {
-                    case "date_desc":
-                        sql.Append(" ORDER BY s.UpdatedAt DESC");
-                        break;
-                    case "date_asc":
-                        sql.Append(" ORDER BY s.UpdatedAt ASC");
-                        break;
-                    case "name_asc":
-                        sql.Append(" ORDER BY s.Title ASC");
-                        break;
-                    case "name_desc":
-                        sql.Append(" ORDER BY s.Title DESC");
-                        break;
-                    case "favorite_asc":
-                        sql.Append(" ORDER BY SavesCount ASC"); 
-                        break;
-                    case "favorite_desc":
-                        sql.Append(" ORDER BY SavesCount DESC"); 
-                        break;
-                    default:
-                        sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-                        break;
-                }
-            }
-            else
-            {
-                sql.Append(" ORDER BY s.UpdatedAt DESC"); // За замовчуванням
-            }
+            AppendFilterIfNotEmpty(sql, parameters, "s.AuthorID", "AuthorIds", authorIds);
+            AppendCategoryFilter(sql, parameters, categoryIds);
+            AppendTagFilter(sql, parameters, tagIds);
+            AppendFilterIfNotEmpty(sql, parameters, "s.ProgrammingLanguageID", "LanguageIds", languageIds);
+            AppendSortOrder(sql, sortOrder);
 
             string connectionString = ConfigurationHelper.GetConnectionString();
             using (var connection = new SqlConnection(connectionString))
@@ -301,6 +165,78 @@ namespace SnippetsLibraryWebApp.Repository
                 snippets = await EnrichSnippetsWithTagsAndCategories(snippets);
                 return snippets;
             }
+        }
+
+        private void AppendSubqueryFilter(StringBuilder sql, DynamicParameters parameters, int[] values, string paramName, string subquery)
+        {
+            if (values != null && values.Length > 0)
+            {
+                sql.Append(" AND " + subquery);
+                parameters.Add(paramName, values);
+            }
+        }
+
+        private void AppendFilterIfNotEmpty(StringBuilder sql, DynamicParameters parameters, string columnName, string paramName, int[] values)
+        {
+            if (values != null && values.Length > 0)
+            {
+                sql.Append($" AND {columnName} IN @{paramName}");
+                parameters.Add(paramName, values);
+            }
+        }
+
+        private void AppendCategoryFilter(StringBuilder sql, DynamicParameters parameters, int[] categoryIds)
+        {
+            if (categoryIds != null && categoryIds.Length > 0)
+            {
+                sql.Append(" AND s.ID IN (");
+                sql.Append("SELECT SnippetID FROM SnippetCategories WHERE CategoryID IN @CategoryIds ");
+                sql.Append("GROUP BY SnippetID HAVING COUNT(DISTINCT CategoryID) = @CategoryCount)");
+                parameters.Add("CategoryIds", categoryIds);
+                parameters.Add("CategoryCount", categoryIds.Length);
+            }
+        }
+
+        private void AppendTagFilter(StringBuilder sql, DynamicParameters parameters, int[] tagIds)
+        {
+            if (tagIds != null && tagIds.Length > 0)
+            {
+                sql.Append(" AND s.ID IN (");
+                sql.Append("SELECT SnippetID FROM SnippetTags WHERE TagID IN @TagIds ");
+                sql.Append("GROUP BY SnippetID HAVING COUNT(DISTINCT TagID) = @TagCount)");
+                parameters.Add("TagIds", tagIds);
+                parameters.Add("TagCount", tagIds.Length);
+            }
+        }
+
+        private void AppendSortOrder(StringBuilder sql, string sortOrder)
+        {
+            string orderBy = " ORDER BY s.UpdatedAt DESC"; // Значення за замовчуванням
+            if (!string.IsNullOrEmpty(sortOrder))
+            {
+                switch (sortOrder)
+                {
+                    case "date_desc":
+                        orderBy = " ORDER BY s.UpdatedAt DESC";
+                        break;
+                    case "date_asc":
+                        orderBy = " ORDER BY s.UpdatedAt ASC";
+                        break;
+                    case "name_asc":
+                        orderBy = " ORDER BY s.Title ASC";
+                        break;
+                    case "name_desc":
+                        orderBy = " ORDER BY s.Title DESC";
+                        break;
+                    case "favorite_asc":
+                        orderBy = " ORDER BY SavesCount ASC";
+                        break;
+                    case "favorite_desc":
+                        orderBy = " ORDER BY SavesCount DESC";
+                        break;
+                }
+            }
+            sql.Append(orderBy);
         }
 
         public async Task<bool> IsSnippedSavedByUser(int userId, int snippetId)
@@ -645,4 +581,3 @@ namespace SnippetsLibraryWebApp.Repository
         }
     }
 }
-
